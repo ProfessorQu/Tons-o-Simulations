@@ -1,12 +1,11 @@
 #pragma kernel GameOfLife
 
-RWTexture2D<float4> Result;
+RWStructuredBuffer<int> Result;
 
-float Width;
-float Height;
+uint Width, Height;
 
 [numthreads(8, 8, 1)]
 void GameOfLife(uint3 id : SV_DispatchThreadID)
 {
-	Result[id.xy] = float4(0, 0, 0, 1);
+	Result[id.x + id.y * Width] = id.x;
 }

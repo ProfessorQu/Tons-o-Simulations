@@ -5,57 +5,69 @@ using UnityEngine;
 public class GameOfLife : MonoBehaviour
 {
     public ComputeShader shader;
-    int kernel;
+    ComputeBuffer buffer;
 
-    Renderer rend;
+    int kernel;
+    int[] output;
+
     RenderTexture texture;
 
-    private void Start()
+    [Min(1)] public int width;
+    [Min(1)] public int height;
+
+
+    private void Awake()
     {
         // Get kernel hand;e
         kernel = shader.FindKernel("GameOfLife");
 
-        // Create texture
-        texture = new RenderTexture(256, 256, 24);
-        texture.enableRandomWrite = true;
-        texture.Create();
+        // Init buffer
+        buffer = new ComputeBuffer(width * height, sizeof(int));
 
-        // Pass the width and height to shader
-        shader.SetFloat("Width", texture.width);
-        shader.SetFloat("Height", texture.height);
+        // Set buffer
+        shader.SetBuffer(kernel, "Result", buffer);
 
-        // Set texture
-        shader.SetTexture(kernel, "Result", texture);
+        // Set width and height
+        shader.SetInt("Width", width);
+        shader.SetInt("Height", height);
+
+        // Calculate thread groups
+        int xGroups = Mathf.CeilToInt(width / 8f);
+        int yGroups = Mathf.CeilToInt(height / 8f);
+
         // Run shader
-        shader.Dispatch(kernel, texture.width / 8, texture.height / 8, 1);
+        shader.Dispatch(kernel, xGroups, yGroups, 1);
 
+        // Init output
+        output = new int[width * height];
 
-        // Get renderer
-        rend = GetComponent<Renderer>();
-
-        // Scale quad to camera size
-        var quadHeight = Camera.main.orthographicSize * 2.0f;
-        var quadWidth = quadHeight * Screen.width / Screen.height;
-
-        transform.localScale = new Vector3(quadWidth, quadHeight, 1);
     }
 
-	private void Update()
-    {
-        // Create texture
-        if (texture == null)
+	private void OnRenderImage(RenderTexture source, RenderTexture destination)
+	{
+        // Set buffer
+        shader.SetBuffer(kernel, "Result", buffer);
+
+        // Calculate thread groups
+        int xGroups = Mathf.CeilToInt(width / 8f);
+        int yGroups = Mathf.CeilToInt(height / 8f);
+
+        // Run shader
+        shader.Dispatch(kernel, xGroups, yGroups, 1);
+
+        // Get data to output
+        buffer.GetData(output);
+
+        // Display texture
+        // Graphics.Blit(texture, destination);
+    }
+
+	private void OnDisable()
+	{
+        if (buffer != null)
         {
-            texture = new RenderTexture(256, 256, 24);
-            texture.enableRandomWrite = true;
-            texture.Create();
+            buffer.Release();
+            buffer = null;
         }
-
-        // Set texture
-        shader.SetTexture(kernel, "Result", texture);
-        // Run shader
-        shader.Dispatch(kernel, texture.width / 8, texture.height / 8, 1);
-
-        // Set texture to material texture
-        rend.material.mainTexture = texture;
-    }
+	}
 }
