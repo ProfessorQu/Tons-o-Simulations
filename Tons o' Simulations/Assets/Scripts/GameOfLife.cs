@@ -5,69 +5,55 @@ using UnityEngine;
 public class GameOfLife : MonoBehaviour
 {
     public ComputeShader shader;
-    ComputeBuffer buffer;
 
     int kernel;
-    int[] output;
 
-    RenderTexture texture;
+    RenderTexture cellTexture;
+    RenderTexture cellRender;
 
-    [Min(1)] public int width;
-    [Min(1)] public int height;
-
+    [Min(1)] public int cellAmount = 1;
+    [Min(1)] public int cellSize = 1;
 
     private void Awake()
     {
         // Get kernel hand;e
         kernel = shader.FindKernel("GameOfLife");
 
-        // Init buffer
-        buffer = new ComputeBuffer(width * height, sizeof(int));
+        // Set cell amount and cell size
+        shader.SetInt("_CellAmount", cellAmount);
+        shader.SetInt("_CellSize", cellSize);
 
-        // Set buffer
-        shader.SetBuffer(kernel, "Result", buffer);
+        // Init cells
+        cellTexture = new RenderTexture(cellAmount, cellAmount, 24);
+        cellTexture.enableRandomWrite = true;
+        cellTexture.Create();
 
-        // Set width and height
-        shader.SetInt("Width", width);
-        shader.SetInt("Height", height);
+        // Set cells
+        shader.SetTexture(kernel, "_CellTexture", cellTexture);
 
         // Calculate thread groups
-        int xGroups = Mathf.CeilToInt(width / 8f);
-        int yGroups = Mathf.CeilToInt(height / 8f);
+        int groups = Mathf.CeilToInt(cellAmount / 8f);
 
         // Run shader
-        shader.Dispatch(kernel, xGroups, yGroups, 1);
-
-        // Init output
-        output = new int[width * height];
-
+        shader.Dispatch(kernel, groups, groups, 1);
     }
 
 	private void OnRenderImage(RenderTexture source, RenderTexture destination)
-	{
-        // Set buffer
-        shader.SetBuffer(kernel, "Result", buffer);
+    {
+        // Set cell amount and cell size
+        shader.SetInt("_CellAmount", cellAmount);
+        shader.SetInt("_CellSize", cellSize);
+
+        // Set cells
+        shader.SetTexture(kernel, "_CellTexture", cellTexture);
 
         // Calculate thread groups
-        int xGroups = Mathf.CeilToInt(width / 8f);
-        int yGroups = Mathf.CeilToInt(height / 8f);
+        int groups = Mathf.CeilToInt(cellAmount / 8f);
 
         // Run shader
-        shader.Dispatch(kernel, xGroups, yGroups, 1);
-
-        // Get data to output
-        buffer.GetData(output);
+        shader.Dispatch(kernel, groups, groups, 1);
 
         // Display texture
-        // Graphics.Blit(texture, destination);
+        Graphics.Blit(cellTexture, destination);
     }
-
-	private void OnDisable()
-	{
-        if (buffer != null)
-        {
-            buffer.Release();
-            buffer = null;
-        }
-	}
 }

@@ -164,8 +164,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shader: {fileID: 7200000, guid: 5738a39673ae075409249cd630b3e5e4, type: 3}
-  width: 9
-  height: 2
+  cellAmount: 1
+  cellSize: 1
 --- !u!20 &1687258584
 Camera:
   m_ObjectHideFlags: 0
