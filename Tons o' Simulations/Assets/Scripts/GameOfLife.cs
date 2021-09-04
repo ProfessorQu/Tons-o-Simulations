@@ -8,11 +8,32 @@ public class GameOfLife : MonoBehaviour
 
     int kernel;
 
+    public RenderTexture cellPrevious;
+    RenderTexture cellNew;
+
     RenderTexture cellTexture;
-    RenderTexture cellRender;
 
     [Min(1)] public int cellAmount = 1;
     [Min(1)] public int cellSize = 1;
+
+    private void SetupTextures()
+    {
+        // Init cells
+        cellPrevious = new RenderTexture(cellAmount, cellAmount, 24);
+        cellPrevious.enableRandomWrite = true;
+        cellPrevious.Create();
+
+        // Init cells
+        cellNew = new RenderTexture(cellAmount, cellAmount, 24);
+        cellNew.enableRandomWrite = true;
+        cellNew.Create();
+
+
+        // Init cells
+        cellTexture = new RenderTexture(cellAmount * cellSize, cellAmount * cellSize, 24);
+        cellTexture.enableRandomWrite = true;
+        cellTexture.Create();
+    }
 
     private void Awake()
     {
@@ -20,15 +41,14 @@ public class GameOfLife : MonoBehaviour
         kernel = shader.FindKernel("GameOfLife");
 
         // Set cell amount and cell size
-        shader.SetInt("_CellAmount", cellAmount);
         shader.SetInt("_CellSize", cellSize);
 
-        // Init cells
-        cellTexture = new RenderTexture(cellAmount, cellAmount, 24);
-        cellTexture.enableRandomWrite = true;
-        cellTexture.Create();
+        SetupTextures();
 
         // Set cells
+        shader.SetTexture(kernel, "_CellPrevious", cellPrevious);
+        shader.SetTexture(kernel, "_CellNew", cellNew);
+
         shader.SetTexture(kernel, "_CellTexture", cellTexture);
 
         // Calculate thread groups
@@ -41,10 +61,12 @@ public class GameOfLife : MonoBehaviour
 	private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         // Set cell amount and cell size
-        shader.SetInt("_CellAmount", cellAmount);
         shader.SetInt("_CellSize", cellSize);
 
         // Set cells
+        shader.SetTexture(kernel, "_CellPrevious", cellPrevious);
+        shader.SetTexture(kernel, "_CellNew", cellNew);
+
         shader.SetTexture(kernel, "_CellTexture", cellTexture);
 
         // Calculate thread groups
@@ -55,5 +77,7 @@ public class GameOfLife : MonoBehaviour
 
         // Display texture
         Graphics.Blit(cellTexture, destination);
+
+        cellPrevious = cellNew;
     }
 }

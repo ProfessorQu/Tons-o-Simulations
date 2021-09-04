@@ -1,11 +1,58 @@
 #pragma kernel GameOfLife
 
-RWTexture2D<float> _CellTexture;
+RWTexture2D<float> _CellPrevious;
+RWTexture2D<float> _CellNew;
 
-uint _CellAmount, _CellSize;
+RWTexture2D<float4> _CellTexture;
+
+uint _CellSize;
+
+int getCellAt(float2 id, int x, int y)
+{
+	return _CellPrevious[id + float2(x, y)];
+}
 
 [numthreads(8, 8, 1)]
 void GameOfLife(uint3 id : SV_DispatchThreadID)
 {
-	_CellTexture[id.xy] = id.x;
+	float currentCell = _CellPrevious[id.xy];
+	
+	int aliveNeigborCells = 0;
+	
+	aliveNeigborCells += getCellAt(id.xy, -1, 1); // Top Left
+	aliveNeigborCells += getCellAt(id.xy, 0,  1); // Top Middle
+	aliveNeigborCells += getCellAt(id.xy, 1,  1); // Top Right
+	
+
+	aliveNeigborCells += getCellAt(id.xy, -1, 0); // Left
+	aliveNeigborCells += getCellAt(id.xy, 1,  0); // Right
+	
+	aliveNeigborCells += getCellAt(id.xy, -1, -1); // Bottom Left
+	aliveNeigborCells += getCellAt(id.xy, 0,  -1); // Bottom Middle
+	aliveNeigborCells += getCellAt(id.xy, 1,  -1); // Bottom Right
+	
+	if (currentCell == 1 && (aliveNeigborCells != 2 && aliveNeigborCells != 3))
+	{
+		_CellNew[id.xy] = 0;
+		currentCell = 0;
+	}
+	else if (currentCell < 1 && aliveNeigborCells == 3)
+	{
+		_CellNew[id.xy] = 1;
+		currentCell = 1;
+	}
+	
+	int minX = _CellSize * id.x;
+	int maxX = _CellSize * id.x + 10;
+	
+	int minY = _CellSize * id.y;
+	int maxY = _CellSize * id.y + 10;
+	
+	for (int x = minX; x <= maxX; x++)
+	{
+		for (int y = minY; y <= maxY; y++)
+		{
+			_CellTexture[float2(x, y)] = float4(currentCell, currentCell, currentCell, 1.0);
+		}
+	}
 }
