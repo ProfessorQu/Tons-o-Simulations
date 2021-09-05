@@ -5,79 +5,90 @@ using UnityEngine;
 public class GameOfLife : MonoBehaviour
 {
     public ComputeShader shader;
+    private int kernel;
 
-    int kernel;
+    [Min(1)] public int gridWidth = 1;
+    [Min(1)] public int gridHeight = 1;
 
-    public RenderTexture cellPrevious;
-    RenderTexture cellNew;
+    public Texture input;
 
-    RenderTexture cellTexture;
+    private bool pingpong = true;
+    RenderTexture pingTexture;
+    RenderTexture pongTexture;
 
-    [Min(1)] public int cellAmount = 1;
-    [Min(1)] public int cellSize = 1;
+    private Vector2 scale;
 
-    private void SetupTextures()
+    public int step;
+    private int _step = 0;
+
+
+    private void Start()
     {
-        // Init cells
-        cellPrevious = new RenderTexture(cellAmount, cellAmount, 24);
-        cellPrevious.enableRandomWrite = true;
-        cellPrevious.Create();
+        pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
+        pingTexture.wrapMode = TextureWrapMode.Repeat;
+        pingTexture.enableRandomWrite = true;
+        pingTexture.filterMode = FilterMode.Point;
+        pingTexture.Create();
 
-        // Init cells
-        cellNew = new RenderTexture(cellAmount, cellAmount, 24);
-        cellNew.enableRandomWrite = true;
-        cellNew.Create();
+        pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
+        pongTexture.wrapMode = TextureWrapMode.Repeat;
+        pongTexture.enableRandomWrite = true;
+        pongTexture.filterMode = FilterMode.Point;
+        pongTexture.Create();
 
-
-        // Init cells
-        cellTexture = new RenderTexture(cellAmount * cellSize, cellAmount * cellSize, 24);
-        cellTexture.enableRandomWrite = true;
-        cellTexture.Create();
-    }
-
-    private void Awake()
-    {
-        // Get kernel hand;e
         kernel = shader.FindKernel("GameOfLife");
 
-        // Set cell amount and cell size
-        shader.SetInt("_CellSize", cellSize);
+        Graphics.Blit(input, pingTexture);
 
-        SetupTextures();
+        shader.SetInt("Width", gridWidth);
+        shader.SetInt("Height", gridHeight);
 
-        // Set cells
-        shader.SetTexture(kernel, "_CellPrevious", cellPrevious);
-        shader.SetTexture(kernel, "_CellNew", cellNew);
+        Camera camera = GetComponent<Camera>();
 
-        shader.SetTexture(kernel, "_CellTexture", cellTexture);
-
-        // Calculate thread groups
-        int groups = Mathf.CeilToInt(cellAmount / 8f);
-
-        // Run shader
-        shader.Dispatch(kernel, groups, groups, 1);
+        scale.x = camera.pixelWidth / 500;
+        scale.y = camera.pixelHeight / 500;
     }
 
-	private void OnRenderImage(RenderTexture source, RenderTexture destination)
+    private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        // Set cell amount and cell size
-        shader.SetInt("_CellSize", cellSize);
+        if (step > _step){
+            if (pingpong)
+            {
 
-        // Set cells
-        shader.SetTexture(kernel, "_CellPrevious", cellPrevious);
-        shader.SetTexture(kernel, "_CellNew", cellNew);
+                shader.SetTexture(kernel, "Input", pingTexture);
+                shader.SetTexture(kernel, "Result", pongTexture);
 
-        shader.SetTexture(kernel, "_CellTexture", cellTexture);
+                int xGroups = Mathf.CeilToInt(gridWidth / 8f);
+                int yGroups = Mathf.CeilToInt(gridHeight / 8f);
 
-        // Calculate thread groups
-        int groups = Mathf.CeilToInt(cellAmount / 8f);
+                shader.Dispatch(kernel, xGroups, yGroups, 1);
 
-        // Run shader
-        shader.Dispatch(kernel, groups, groups, 1);
+                Graphics.Blit(pingTexture, destination, scale, new Vector2(0, 0));
+            }
+            else
+            {
 
-        // Display texture
-        Graphics.Blit(cellTexture, destination);
+                shader.SetTexture(kernel, "Input", pongTexture);
+                shader.SetTexture(kernel, "Result", pingTexture);
 
-        cellPrevious = cellNew;
+                int xGroups = Mathf.CeilToInt(gridWidth / 8f);
+                int yGroups = Mathf.CeilToInt(gridHeight / 8f);
+
+                shader.Dispatch(kernel, xGroups, yGroups, 1);
+
+                Graphics.Blit(pongTexture, destination, scale, new Vector2(0, 0));
+            }
+
+            pingpong = !pingpong;
+            _step++;
+        }
+
+        //Graphics.Blit(cellPrevious, destination);
+    }
+
+    private void OnDestroy()
+    {
+        pingTexture.Release();
+        pongTexture.Release();
     }
 }

@@ -164,8 +164,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shader: {fileID: 7200000, guid: 5738a39673ae075409249cd630b3e5e4, type: 3}
-  cellAmount: 1
-  cellSize: 1
+  gridWidth: 8
+  gridHeight: 8
+  input: {fileID: 2800000, guid: 1a692266d8ff0f646bdeadfca1cc9c96, type: 3}
+  step: 2
 --- !u!20 &1687258584
 Camera:
   m_ObjectHideFlags: 0
@@ -176,7 +178,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.17933428, g: 0.33705646, b: 0.5849056, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
