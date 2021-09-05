@@ -3,73 +3,61 @@
 RWTexture2D<float4> Input;
 RWTexture2D<float4> Result;
 
-uniform int Width, Height;
+uniform unsigned int Width, Height;
 
 [numthreads(8, 8, 1)]
 void GameOfLife(uint3 id : SV_DispatchThreadID)
 {
+    float4 neigborCells = 0;
+    
+    neigborCells += Input[id.xy + float2(-1, -1)]; // Bottom Left
+    neigborCells += Input[id.xy + float2( 0, -1)]; // Bottom Middle
+    neigborCells += Input[id.xy + float2( 1, -1)]; // Bottom Right
+    
+    neigborCells += Input[id.xy + float2(-1,  0)]; // Left
+    neigborCells += Input[id.xy + float2( 1,  0)]; // Right
+    
+    neigborCells += Input[id.xy + float2(-1,  1)]; // Top Left
+    neigborCells += Input[id.xy + float2( 0,  1)]; // Top Middle
+    neigborCells += Input[id.xy + float2( 1,  1)]; // Top Right
+    
     /*
-    float2 position = float2((id.x) / Width, (id.y) / Height);
-    float2 pixelSize = float2(1.0 / Width, 1.0 / Height);
-
-    float currentCell = tex2Dlod(_CellPrevious, float4(position.x, position.y, 0, 0)).r;
-
-    float neighborCells = 0.0f;
-	// +Y
-    neighborCells += tex2Dlod(_CellPrevious, float4(position.x + pixelSize.x, position.y + pixelSize.y, 0, 0)).r;
-    neighborCells += tex2Dlod(_CellPrevious, float4(position.x, position.y + pixelSize.y, 0, 0)).r;
-    neighborCells += tex2Dlod(_CellPrevious, float4(position.x - pixelSize.x, position.y + pixelSize.y, 0, 0)).r;
-	// Neutral Y
-    neighborCells += tex2Dlod(_CellPrevious, float4(position.x + pixelSize.x, position.y, 0, 0)).r;
-    neighborCells += tex2Dlod(_CellPrevious, float4(position.x - pixelSize.x, position.y, 0, 0)).r;
-	// -Y
-    neighborCells += tex2Dlod(_CellPrevious, float4(position.x + pixelSize.x, position.y - pixelSize.y, 0, 0)).r;
-    neighborCells += tex2Dlod(_CellPrevious, float4(position.x, position.y - pixelSize.y, 0, 0)).r;
-    neighborCells += tex2Dlod(_CellPrevious, float4(position.x - pixelSize.x, position.y - pixelSize.y, 0, 0)).r;
-
-    if (currentCell > 0.5)
+    for (int x = -1; x <= 1; x++)
     {
-        if (neighborCells > 1.5 && neighborCells < 3.5) // == 2 || == 3
+        for (int y = -1; y <= 1; y++)
         {
-            _CellNew[position.xy] = float4(1, 1, 1, 1);
-        }
-        else
-        {
-            _CellNew[position.xy] = float4(0, 0, 0, 1);
+            float xInput = id.x;
+            float yInput = id.y;
+            
+            if (id.x + x < 0)
+            {
+                xInput = Width;
+            }
+            else if (id.x + x > Width)
+            {
+                xInput = 0;
+            }
+
+            if (id.y + y < 0)
+            {
+                yInput = Height;
+            }
+            else if (id.y + y > Height)
+            {
+                yInput = 0;
+            }
+            
+            neigborCells += Input[float2(xInput, yInput)].r;
         }
     }
-    else
-    {
-        if (neighborCells > 2.5 && neighborCells < 3.5) // == 3
-        {
-            _CellNew[position.xy] = float4(1, 1, 1, 1);
-        }
-        else
-        {
-            _CellNew[position.xy] = float4(0, 0, 0, 1);
-        }
-    }
-    */
-    
-    int sum = 0;
-    
-    sum += Input[id.xy + float2(-1, -1)].r; // Bottom Left
-    sum += Input[id.xy + float2( 0, -1)].r; // Bottom Middle
-    sum += Input[id.xy + float2( 1, -1)].r; // Bottom Right
-    
-    sum += Input[id.xy + float2(-1,  0)].r; // Left
-    sum += Input[id.xy + float2( 1,  0)].r; // Right
-    
-    sum += Input[id.xy + float2(-1,  1)].r; // Top Left
-    sum += Input[id.xy + float2( 0,  1)].r; // Top Middle
-    sum += Input[id.xy + float2( 1,  1)].r; // Top Right
+*/
     
     if (Input[id.xy].r > 0)
     {
-        Result[id.xy] = (sum == 2 || sum == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
+        Result[id.xy] = (neigborCells == 2 || neigborCells == 3) ? AliveColor : DeadColor;
     }
     else
     {
-        Result[id.xy] = (sum == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
+        Result[id.xy] = (neigborCells == 3) ? AliveColor : DeadColor;
     }
 }

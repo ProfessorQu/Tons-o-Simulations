@@ -21,7 +21,6 @@ public class GameOfLife : MonoBehaviour
     public int step;
     private int _step = 0;
 
-
     private void Start()
     {
         pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
@@ -51,10 +50,10 @@ public class GameOfLife : MonoBehaviour
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        if (step > _step){
+        if (step > _step)
+        {
             if (pingpong)
             {
-
                 shader.SetTexture(kernel, "Input", pingTexture);
                 shader.SetTexture(kernel, "Result", pongTexture);
 
