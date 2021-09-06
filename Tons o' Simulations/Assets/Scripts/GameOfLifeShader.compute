@@ -3,10 +3,29 @@
 RWTexture2D<float4> Input;
 RWTexture2D<float4> Result;
 
+unsigned int Width, Height;
+
 [numthreads(8, 8, 1)]
 void GameOfLife(uint3 id : SV_DispatchThreadID)
 {
-    float4 neigborCells = 0;
+    float4 neigborCells = float4(0, 0, 0, 1);
+    
+    /*
+    for (int x = -1; x <= 1; x++)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            if (id.x + x > Width || id.x + x < 0)
+                continue;
+            
+            if (id.y + y > Height || id.y + y < 0)
+                continue;
+            
+            neigborCells += Input[id.xy + float2(x, y)];
+        }
+    }
+    */
+    
     
     neigborCells += Input[id.xy + float2(-1, -1)]; // Bottom Left
     neigborCells += Input[id.xy + float2( 0, -1)]; // Bottom Middle
@@ -19,43 +38,15 @@ void GameOfLife(uint3 id : SV_DispatchThreadID)
     neigborCells += Input[id.xy + float2( 0,  1)]; // Top Middle
     neigborCells += Input[id.xy + float2( 1,  1)]; // Top Right
     
-    /*
-    for (int x = -1; x <= 1; x++)
-    {
-        for (int y = -1; y <= 1; y++)
-        {
-            float xInput = id.x;
-            float yInput = id.y;
-            
-            if (id.x + x < 0)
-            {
-                xInput = Width;
-            }
-            else if (id.x + x > Width)
-            {
-                xInput = 0;
-            }
-
-            if (id.y + y < 0)
-            {
-                yInput = Height;
-            }
-            else if (id.y + y > Height)
-            {
-                yInput = 0;
-            }
-            
-            neigborCells += Input[float2(xInput, yInput)].r;
-        }
-    }
-*/
     
-    if (Input[id.xy].r > 0)
+    int aliveCells = (int) round(neigborCells.r);
+    
+    if (Input[id.xy].r > 0.5)
     {
-        Result[id.xy] = (neigborCells == 2 || neigborCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 0);
+        Result[id.xy] = (aliveCells == 2 || aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
     }
     else
     {
-        Result[id.xy] = (neigborCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 0);
+        Result[id.xy] = (aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
     }
 }

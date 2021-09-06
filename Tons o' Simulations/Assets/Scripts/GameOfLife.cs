@@ -20,28 +20,23 @@ public class GameOfLife : MonoBehaviour
 
     private void Start()
     {
+        Setup();
+    }
+
+    public void Setup()
+    {
+        pingTexture = null;
+        pongTexture = null;
+
+        mat = null;
+
         SetupTextures();
         SetupShader();
         SetupQuad();
     }
 
-    public void Step()
-    {
-        if (pingTexture == null || pongTexture == null)
-        {
-            SetupTextures();
-		}
-
-        if (kernel == 0)
-        {
-            SetupShader();
-		}
-
-        if (mat == null)
-        {
-            SetupQuad();
-		}
-
+	public void Step()
+	{
         if (pingpong)
         {
             shader.SetTexture(kernel, "Input", pingTexture);
@@ -52,11 +47,11 @@ public class GameOfLife : MonoBehaviour
 
             shader.Dispatch(kernel, xGroups, yGroups, 1);
 
+            // Graphics.Blit(pongTexture, destination);
             mat.mainTexture = pingTexture;
         }
         else
         {
-
             shader.SetTexture(kernel, "Input", pongTexture);
             shader.SetTexture(kernel, "Result", pingTexture);
 
@@ -65,6 +60,7 @@ public class GameOfLife : MonoBehaviour
 
             shader.Dispatch(kernel, xGroups, yGroups, 1);
 
+            // Graphics.Blit(pingTexture, destination);
             mat.mainTexture = pongTexture;
         }
 
@@ -100,9 +96,7 @@ public class GameOfLife : MonoBehaviour
     {
         mat = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
 
-        var quadHeight = Camera.main.orthographicSize * 2.0f;
-        var quadWidth = quadHeight * Screen.width / Screen.height;
-        transform.localScale = new Vector3(quadWidth, quadHeight, 1);
+        transform.localScale = new Vector3(20, 20, 1);
     }
 
     private void OnDestroy()
