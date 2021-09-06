@@ -3,8 +3,6 @@
 RWTexture2D<float4> Input;
 RWTexture2D<float4> Result;
 
-uniform unsigned int Width, Height;
-
 [numthreads(8, 8, 1)]
 void GameOfLife(uint3 id : SV_DispatchThreadID)
 {
@@ -54,10 +52,10 @@ void GameOfLife(uint3 id : SV_DispatchThreadID)
     
     if (Input[id.xy].r > 0)
     {
-        Result[id.xy] = (neigborCells == 2 || neigborCells == 3) ? AliveColor : DeadColor;
+        Result[id.xy] = (neigborCells == 2 || neigborCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 0);
     }
     else
     {
-        Result[id.xy] = (neigborCells == 3) ? AliveColor : DeadColor;
+        Result[id.xy] = (neigborCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 0);
     }
 }

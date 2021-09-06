@@ -16,12 +16,62 @@ public class GameOfLife : MonoBehaviour
     RenderTexture pingTexture;
     RenderTexture pongTexture;
 
-    private Vector2 scale;
-
-    public int step;
-    private int _step = 0;
+    private Material mat;
 
     private void Start()
+    {
+        SetupTextures();
+        SetupShader();
+        SetupQuad();
+    }
+
+    public void Step()
+    {
+        if (pingTexture == null || pongTexture == null)
+        {
+            SetupTextures();
+		}
+
+        if (kernel == 0)
+        {
+            SetupShader();
+		}
+
+        if (mat == null)
+        {
+            SetupQuad();
+		}
+
+        if (pingpong)
+        {
+            shader.SetTexture(kernel, "Input", pingTexture);
+            shader.SetTexture(kernel, "Result", pongTexture);
+
+            int xGroups = Mathf.CeilToInt(gridWidth / 8f);
+            int yGroups = Mathf.CeilToInt(gridHeight / 8f);
+
+            shader.Dispatch(kernel, xGroups, yGroups, 1);
+
+            mat.mainTexture = pingTexture;
+        }
+        else
+        {
+
+            shader.SetTexture(kernel, "Input", pongTexture);
+            shader.SetTexture(kernel, "Result", pingTexture);
+
+            int xGroups = Mathf.CeilToInt(gridWidth / 8f);
+            int yGroups = Mathf.CeilToInt(gridHeight / 8f);
+
+            shader.Dispatch(kernel, xGroups, yGroups, 1);
+
+            mat.mainTexture = pongTexture;
+        }
+
+        pingpong = !pingpong;
+    }
+
+    private void SetupTextures()
     {
         pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
         pingTexture.wrapMode = TextureWrapMode.Repeat;
@@ -34,59 +84,30 @@ public class GameOfLife : MonoBehaviour
         pongTexture.enableRandomWrite = true;
         pongTexture.filterMode = FilterMode.Point;
         pongTexture.Create();
+    }
 
+    private void SetupShader()
+    {
         kernel = shader.FindKernel("GameOfLife");
 
         Graphics.Blit(input, pingTexture);
 
         shader.SetInt("Width", gridWidth);
         shader.SetInt("Height", gridHeight);
-
-        Camera camera = GetComponent<Camera>();
-
-        scale.x = camera.pixelWidth / 500;
-        scale.y = camera.pixelHeight / 500;
     }
 
-    private void OnRenderImage(RenderTexture source, RenderTexture destination)
+    private void SetupQuad()
     {
-        if (step > _step)
-        {
-            if (pingpong)
-            {
-                shader.SetTexture(kernel, "Input", pingTexture);
-                shader.SetTexture(kernel, "Result", pongTexture);
+        mat = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
 
-                int xGroups = Mathf.CeilToInt(gridWidth / 8f);
-                int yGroups = Mathf.CeilToInt(gridHeight / 8f);
-
-                shader.Dispatch(kernel, xGroups, yGroups, 1);
-
-                Graphics.Blit(pingTexture, destination, scale, new Vector2(0, 0));
-            }
-            else
-            {
-
-                shader.SetTexture(kernel, "Input", pongTexture);
-                shader.SetTexture(kernel, "Result", pingTexture);
-
-                int xGroups = Mathf.CeilToInt(gridWidth / 8f);
-                int yGroups = Mathf.CeilToInt(gridHeight / 8f);
-
-                shader.Dispatch(kernel, xGroups, yGroups, 1);
-
-                Graphics.Blit(pongTexture, destination, scale, new Vector2(0, 0));
-            }
-
-            pingpong = !pingpong;
-            _step++;
-        }
-
-        //Graphics.Blit(cellPrevious, destination);
+        var quadHeight = Camera.main.orthographicSize * 2.0f;
+        var quadWidth = quadHeight * Screen.width / Screen.height;
+        transform.localScale = new Vector3(quadWidth, quadHeight, 1);
     }
 
     private void OnDestroy()
     {
+        // Release textures
         pingTexture.Release();
         pongTexture.Release();
     }

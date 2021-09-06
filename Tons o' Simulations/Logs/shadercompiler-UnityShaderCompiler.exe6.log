@@ -2,23 +2,6 @@ Base path: 'C:/Program Files/Unity/Hub/Editor/2020.3.17f1/Editor/Data', plugins 
 Cmd: initializeCompiler
 
 Cmd: compileComputeKernel
-  insize=1600 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0  error: 1 plat 4 at GameOfLifeShader.compute(35): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at GameOfLifeShader.compute(40): signed/unsigned mismatch, unsigned assumed
- ok=1 outsize=1373
-
-Cmd: compileComputeKernel
-  insize=1741 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0  error: 2 plat 4 at GameOfLifeShader.compute(39): syntax error: unexpected token 'f'
-  error: 2 plat 4 at GameOfLifeShader.compute(42): syntax error: unexpected token 'f'
-  error: 2 plat 4 at GameOfLifeShader.compute(46): syntax error: unexpected token 'else'
-  error: 2 plat 4 at GameOfLifeShader.compute(51): undeclared identifier 'xInput'
- ok=0 outsize=0
-
-Cmd: compileComputeKernel
-  insize=1716 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0  error: 2 plat 4 at GameOfLifeShader.compute(59): undeclared identifier 'aliveColor'
- ok=0 outsize=0
-
-Cmd: compileComputeKernel
-  insize=1683 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0  error: 2 plat 4 at GameOfLifeShader.compute(57): undeclared identifier 'AliveColor'
- ok=0 outsize=0
+  insize=1678 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 ok=1 outsize=1418
 
 Cmd: shutdown
