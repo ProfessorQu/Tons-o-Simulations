@@ -1,37 +1,23 @@
 #pragma kernel GameOfLife
 
+/*
+Rules of the Game Of Life
+
+1. Live cells with < 2 live neigbors dies.
+2. Live cells with 2 or 3 live neighbors live.
+3. Live cells with > 3 live neighbors dies.
+4. Dead cells with 3 live neigbors becomes alive.
+*/
+
 RWTexture2D<float4> Input;
 RWTexture2D<float4> Result;
 
 unsigned int Width, Height;
 
-int becomeAlive[1000];
-int stayAlive[1000];
-
-int becomeAliveLength;
-int stayAliveLength;
-
 [numthreads(8, 8, 1)]
 void GameOfLife(uint3 id : SV_DispatchThreadID)
 {
     float4 neigborCells = float4(0, 0, 0, 1);
-    
-    /*
-    for (int x = -1; x <= 1; x++)
-    {
-        for (int y = -1; y <= 1; y++)
-        {
-            if (id.x + x > Width || id.x + x < 0)
-                continue;
-            
-            if (id.y + y > Height || id.y + y < 0)
-                continue;
-            
-            neigborCells += Input[id.xy + float2(x, y)];
-        }
-    }
-    */
-    
     
     neigborCells += Input[id.xy + float2(-1, -1)]; // Bottom Left
     neigborCells += Input[id.xy + float2( 0, -1)]; // Bottom Middle
@@ -44,40 +30,18 @@ void GameOfLife(uint3 id : SV_DispatchThreadID)
     neigborCells += Input[id.xy + float2( 0,  1)]; // Top Middle
     neigborCells += Input[id.xy + float2( 1,  1)]; // Top Right
     
+    // Get the alive neigbor cells
     int aliveCells = (int) neigborCells.r;
     
-    bool alive = false;
-    
+    // Check if current cell is alive
     if (Input[id.xy].r > 0.5)
     {
-        /*
-        for (int i = 0; i++; i < stayAliveLength)
-        {
-            if (aliveCells == stayAlive[i])
-            {
-                alive = true;
-                break;
-            }
-        }
-        */
-    
+        // neigbor cells = 2 or = 3
         Result[id.xy] = (aliveCells == 2 || aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
     }
     else
     {
-        /*
-        for (int i = 0; i++; i < becomeAliveLength)
-        {
-            if (aliveCells == becomeAlive[i])
-            {
-                alive = true;
-                break;
-            }
-        }
-        */
-        
+        // neigbor cells = 3
         Result[id.xy] = (aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
     }
-    
-    // Result[id.xy] = (alive) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
 }

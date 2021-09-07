@@ -12,10 +12,6 @@ public class GameOfLife : MonoBehaviour
     [Min(1)] public int gridWidth = 1;
     [Min(1)] public int gridHeight = 1;
 
-    // Change rules
-    public int[] neigborsToBecomeAlive;
-    public int[] neigborsToStayAlive;
-
     // Set texture input
     public Texture input;
 
@@ -68,14 +64,6 @@ public class GameOfLife : MonoBehaviour
         // Set width and height
         shader.SetInt("Width", gridWidth);
         shader.SetInt("Height", gridHeight);
-
-        // Set lenghts
-        shader.SetInt("becomeAliveLength", neigborsToBecomeAlive.Length);
-        shader.SetInt("stayAliveLength", neigborsToStayAlive.Length);
-
-        // Set compute buffers
-        shader.SetInts("becomeAlive", neigborsToBecomeAlive);
-        shader.SetInts("stayAlive", neigborsToStayAlive);
 
         // Get material
         mat = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
