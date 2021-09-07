@@ -5,6 +5,12 @@ RWTexture2D<float4> Result;
 
 unsigned int Width, Height;
 
+int becomeAlive[1000];
+int stayAlive[1000];
+
+int becomeAliveLength;
+int stayAliveLength;
+
 [numthreads(8, 8, 1)]
 void GameOfLife(uint3 id : SV_DispatchThreadID)
 {
@@ -38,15 +44,40 @@ void GameOfLife(uint3 id : SV_DispatchThreadID)
     neigborCells += Input[id.xy + float2( 0,  1)]; // Top Middle
     neigborCells += Input[id.xy + float2( 1,  1)]; // Top Right
     
+    int aliveCells = (int) neigborCells.r;
     
-    int aliveCells = (int) round(neigborCells.r);
+    bool alive = false;
     
     if (Input[id.xy].r > 0.5)
     {
+        /*
+        for (int i = 0; i++; i < stayAliveLength)
+        {
+            if (aliveCells == stayAlive[i])
+            {
+                alive = true;
+                break;
+            }
+        }
+        */
+    
         Result[id.xy] = (aliveCells == 2 || aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
     }
     else
     {
+        /*
+        for (int i = 0; i++; i < becomeAliveLength)
+        {
+            if (aliveCells == becomeAlive[i])
+            {
+                alive = true;
+                break;
+            }
+        }
+        */
+        
         Result[id.xy] = (aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
     }
+    
+    // Result[id.xy] = (alive) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
 }

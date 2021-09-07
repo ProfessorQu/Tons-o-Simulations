@@ -2,22 +2,12 @@ Base path: 'C:/Program Files/Unity/Hub/Editor/2020.3.17f1/Editor/Data', plugins 
 Cmd: initializeCompiler
 
 Cmd: compileComputeKernel
-  insize=1010 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 ok=1 outsize=1398
+  insize=1709 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0  error: 1 plat 4 at GameOfLifeShader.compute(52): loop only executes for 0 iteration(s), forcing loop to unroll
+  error: 1 plat 4 at GameOfLifeShader.compute(52): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 4 at GameOfLifeShader.compute(59): loop only executes for 0 iteration(s), forcing loop to unroll
+  error: 1 plat 4 at GameOfLifeShader.compute(59): signed/unsigned mismatch, unsigned assumed
+ ok=1 outsize=227
 
-Cmd: compileComputeKernel
-  insize=1054 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 ok=1 outsize=1406
+Cmd: shutdown
 
-Cmd: compileComputeKernel
-  insize=1595 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0  error: 1 plat 4 at GameOfLifeShader.compute(19): signed/unsigned mismatch, unsigned assumed
-  error: 1 plat 4 at GameOfLifeShader.compute(24): signed/unsigned mismatch, unsigned assumed
- ok=1 outsize=986
-
-Cmd: compileComputeKernel
-  insize=1604 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 ok=1 outsize=1165
-
-Cmd: compileComputeKernel
-  insize=1602 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 ok=1 outsize=1078
-
-Cmd: compileComputeKernel
-  insize=1472 file=D:/Quint/Unity/Tons-o-Simulations/Tons o' Simulations/Assets/Scripts/GameOfLifeShader.compute kernel=GameOfLife cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=19 km=<UNITY_VERSION=202039> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_RGBM_ENCODING uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 ok=1 outsize=1397
-
+Quitting shader compiler process
