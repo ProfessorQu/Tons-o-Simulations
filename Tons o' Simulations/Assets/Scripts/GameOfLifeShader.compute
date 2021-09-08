@@ -1,4 +1,5 @@
-#pragma kernel GameOfLife
+#pragma kernel CSMain
+#pragma kernel CSInit
 
 /*
 Rules of the Game Of Life
@@ -14,21 +15,69 @@ RWTexture2D<float4> Result;
 
 unsigned int Width, Height;
 
+float Random;
+
+float rand(float2 co)
+{
+    return 0.5 + (frac(sin(dot(co.xy, float2(12.9898, Random))) * 43758.5453)) * 0.5;
+}
+
 [numthreads(8, 8, 1)]
-void GameOfLife(uint3 id : SV_DispatchThreadID)
+void CSInit(uint3 id : SV_DispatchThreadID)
+{
+    Result[id.xy] = rand(id.xy) > 0.8 ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
+}
+
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
 {
     float4 neigborCells = float4(0, 0, 0, 1);
     
-    neigborCells += Input[id.xy + float2(-1, -1)]; // Bottom Left
-    neigborCells += Input[id.xy + float2( 0, -1)]; // Bottom Middle
-    neigborCells += Input[id.xy + float2( 1, -1)]; // Bottom Right
+    bool negY = false;
+    bool posY = false;
+
+    if (!(id.y - 1 > Height || id.y - 1 < 0))
+        negY = true;
+    if (!(id.y + 1 > Height || id.y + 1 < 0))
+        posY = true;
     
-    neigborCells += Input[id.xy + float2(-1,  0)]; // Left
-    neigborCells += Input[id.xy + float2( 1,  0)]; // Right
     
-    neigborCells += Input[id.xy + float2(-1,  1)]; // Top Left
-    neigborCells += Input[id.xy + float2( 0,  1)]; // Top Middle
-    neigborCells += Input[id.xy + float2( 1,  1)]; // Top Right
+    bool negX = false;
+    bool posX = false;
+    
+    if (!(id.x - 1 > Height || id.x - 1 < 0))
+        negX = true;
+    if (!(id.x + 1 > Height || id.x + 1 < 0))
+        posX = true;
+    
+    if (negY)
+    {
+        if (negX)
+            neigborCells += Input[id.xy + float2(-1, -1)];  // Bottom Left
+        
+        neigborCells += Input[id.xy + float2(0, -1)];       // Bottom Middle
+        
+        if (posX)
+            neigborCells += Input[id.xy + float2(1, -1)];   // Bottom Right
+    }
+    
+    if (negX)
+        neigborCells += Input[id.xy + float2(-1,  0)];      // Left
+    
+    if (posX)
+        neigborCells += Input[id.xy + float2( 1,  0)];      // Right
+    
+    if (posY)
+    {
+        if (negX)
+            neigborCells += Input[id.xy + float2(-1, 1)];   // Top Left
+        
+        neigborCells += Input[id.xy + float2(0, 1)];        // Top Middle
+        
+        if (posX)
+        neigborCells += Input[id.xy + float2(1, 1)];        // Top Right
+    }
     
     // Get the alive neigbor cells
     int aliveCells = (int) neigborCells.r;
