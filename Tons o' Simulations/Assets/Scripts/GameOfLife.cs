@@ -12,6 +12,8 @@ public class GameOfLife : MonoBehaviour
     [Min(1)] public int gridWidth = 1;
     [Min(1)] public int gridHeight = 1;
 
+    [Range(0, 1)] public float valueToBeAlive = 0.75f;
+
     // Calculate groups
     int xGroups;
     int yGroups;
@@ -38,6 +40,7 @@ public class GameOfLife : MonoBehaviour
     private void Start()
     {
         Setup();
+        Randomize();
     }
 
     public void Setup()
@@ -77,8 +80,8 @@ public class GameOfLife : MonoBehaviour
         kernel = shader.FindKernel("CSMain");
 
         // Set width and height
-        shader.SetInt("Width", gridWidth);
-        shader.SetInt("Height", gridHeight);
+        shader.SetInt("_Width", gridWidth);
+        shader.SetInt("_Height", gridHeight);
 
         // Get material
         mat = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
@@ -87,15 +90,22 @@ public class GameOfLife : MonoBehaviour
         widthDivide = (gridWidth - 1) / 20.0f;
         heightDivide = (gridHeight - 1) / 20.0f;
 
+    }
 
+    public void Randomize()
+    {
         // Init simulation
         int initKernel = shader.FindKernel("CSInit");
 
+        RenderTexture tex = pingpong ? pingTexture : pongTexture;
+
         // Set texture
-        shader.SetTexture(initKernel, "Result", pingTexture);
+        shader.SetTexture(initKernel, "Result", tex);
 
         // Pass Random
-        shader.SetFloat("Random", Random.Range(-10, 10));
+        shader.SetFloat("_Random", Random.Range(-10, 10));
+        // Pass value to be alive
+        shader.SetFloat("_ValueToBeAlive", valueToBeAlive);
         // Run init shader
         shader.Dispatch(initKernel, xGroups, yGroups, 1);
         // Render image
@@ -134,6 +144,7 @@ public class GameOfLife : MonoBehaviour
         pingpong = !pingpong;
     }
 
+    /*
 	private void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -178,7 +189,7 @@ public class GameOfLife : MonoBehaviour
                 Debug.Log(string.Format("({0}, {1}) is not in the grid", cellX, cellY));
 			}
         }
-    }
+    }*/
 
 	private void OnDestroy()
     {

@@ -33,5 +33,19 @@ public class GameOfLifeEditor : Editor
 
 		// End horizontal
 		GUILayout.EndHorizontal();
+
+
+
+		// Begin horizontal
+		GUILayout.BeginHorizontal();
+
+		// Randomize button
+		if (GUILayout.Button("Randomize"))
+		{
+			gameOfLife.Randomize();
+		}
+
+		// End horizontal
+		GUILayout.EndHorizontal();
 	}
 }
