@@ -45,6 +45,11 @@ public class GameOfLifeEditor : Editor
 			gameOfLife.Randomize();
 		}
 
+		if(GUILayout.Button(gameOfLife.playing ? "Stop" : "Play"))
+		{
+			gameOfLife.playing = !gameOfLife.playing;
+		}
+
 		// End horizontal
 		GUILayout.EndHorizontal();
 	}

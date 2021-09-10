@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CameraController : MonoBehaviour//, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class CameraController : MonoBehaviour
 {
-	public int zoomSpeed = 1;
-	public int dragSpeed = 1;
+	public float zoomSpeed = 1;
+	public float dragSpeed = 1;
 
 	public GameOfLife gameOfLife;
 
 	private Camera cam;
-	private Vector2 screenMiddle;
+
+	private Vector2 dragPos;
+	private bool dragging;
 
 	private float defaultSize;
 	private Vector3 defaultPos;
@@ -20,11 +22,10 @@ public class CameraController : MonoBehaviour//, IDragHandler, IBeginDragHandler
 	{
 		cam = Camera.main;
 
-		screenMiddle.x = Screen.width - Screen.width / 2;
-		screenMiddle.y = Screen.height - Screen.height / 2;
-
 		defaultSize = cam.orthographicSize;
 		defaultPos = cam.transform.position;
+
+		dragging = false;
 	}
 
 	private void Update()
@@ -34,6 +35,25 @@ public class CameraController : MonoBehaviour//, IDragHandler, IBeginDragHandler
 		if (cam.orthographicSize - mouseScroll > 0)
 		{
 			cam.orthographicSize -= mouseScroll * Time.deltaTime * zoomSpeed;
+		}
+
+		if (Input.GetMouseButtonDown(0) && !dragging)
+		{
+			dragPos = Input.mousePosition;
+			dragging = true;
+		}
+
+		if (Input.GetMouseButtonUp(0))
+		{
+			dragging = false;
+		}
+
+		if (dragging)
+		{
+			Vector2 mousePos = Input.mousePosition;
+			Vector2 move = (mousePos - dragPos) * Time.deltaTime * dragSpeed * cam.orthographicSize;
+
+			transform.Translate(-move, Space.World);
 		}
 
 		if (Input.GetMouseButtonDown(1))

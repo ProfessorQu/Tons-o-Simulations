@@ -9,17 +9,16 @@ public class GameOfLife : MonoBehaviour
     private int kernel;
 
     // Set grid width and height
-    [Min(1)] public int gridWidth = 1;
-    [Min(1)] public int gridHeight = 1;
+    [Min(1)] public int gridSize = 1;
 
     [Range(0, 1)] public float valueToBeAlive = 0.75f;
 
-    // Calculate groups
-    int xGroups;
-    int yGroups;
+    [HideInInspector] public bool playing = false;
 
-    // Set texture input
-    // public Texture input;
+    public float generationSpeed;
+
+    // Calculate groups
+    int groups;
 
     // Set pingpong bool
     private bool pingpong = true;
@@ -27,14 +26,10 @@ public class GameOfLife : MonoBehaviour
     RenderTexture pingTexture;
     RenderTexture pongTexture;
 
-    public Texture2D tex2D;
+    // public Texture2D tex2D;
 
     // Set material
     private Material mat;
-
-    // Set divisions
-    float widthDivide;
-    float heightDivide;
 
     private void Start()
     {
@@ -55,18 +50,17 @@ public class GameOfLife : MonoBehaviour
         pingpong = true;
 
         // Calculate kernel groups
-        xGroups = Mathf.CeilToInt(gridWidth / 8f);
-        yGroups = Mathf.CeilToInt(gridHeight / 8f);
+        groups = Mathf.CeilToInt(gridSize / 8f);
 
         // Create ping texture
-        pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
+        pingTexture = new RenderTexture(gridSize, gridSize, 24);
         pingTexture.wrapMode = TextureWrapMode.Repeat;
         pingTexture.enableRandomWrite = true;
         pingTexture.filterMode = FilterMode.Point;
         pingTexture.Create();
 
         // Create pong texture
-        pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
+        pongTexture = new RenderTexture(gridSize, gridSize, 24);
         pongTexture.wrapMode = TextureWrapMode.Repeat;
         pongTexture.enableRandomWrite = true;
         pongTexture.filterMode = FilterMode.Point;
@@ -76,16 +70,15 @@ public class GameOfLife : MonoBehaviour
         kernel = shader.FindKernel("CSMain");
 
         // Set width and height
-        shader.SetInt("_Width", gridWidth);
-        shader.SetInt("_Height", gridHeight);
+        shader.SetInt("_Width", gridSize);
+        shader.SetInt("_Height", gridSize);
 
         // Get material
         mat = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
 
-        // Calculate divisions
-        widthDivide = (gridWidth - 1) / 20.0f;
-        heightDivide = (gridHeight - 1) / 20.0f;
+        CancelInvoke();
 
+        InvokeRepeating("Step", 0.0f, generationSpeed);
     }
 
     public void Randomize()
@@ -103,14 +96,13 @@ public class GameOfLife : MonoBehaviour
         // Pass value to be alive
         shader.SetFloat("_ValueToBeAlive", valueToBeAlive);
         // Run init shader
-        shader.Dispatch(initKernel, xGroups, yGroups, 1);
+        shader.Dispatch(initKernel, groups, groups, 1);
         // Render image
         Step();
     }
 
 	public void Step()
 	{
-
         if (pingpong)
         {
             // Set textures
@@ -118,7 +110,7 @@ public class GameOfLife : MonoBehaviour
             shader.SetTexture(kernel, "Result", pongTexture);
 
             // Run shader
-            shader.Dispatch(kernel, xGroups, yGroups, 1);
+            shader.Dispatch(kernel, groups, groups, 1);
 
             // Set material
             mat.mainTexture = pingTexture;
@@ -130,7 +122,7 @@ public class GameOfLife : MonoBehaviour
             shader.SetTexture(kernel, "Result", pingTexture);
 
             // Run shader
-            shader.Dispatch(kernel, xGroups, yGroups, 1);
+            shader.Dispatch(kernel, groups, groups, 1);
 
             // Set material
             mat.mainTexture = pongTexture;
@@ -140,36 +132,17 @@ public class GameOfLife : MonoBehaviour
         pingpong = !pingpong;
     }
 
-    /*
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
+	private void Update()
+	{
+		if (playing && !IsInvoking())
         {
-            // Get mouse position
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-            // Instantiate X and Y variables
-            int cellX, cellY;
-
-            // Scale 0 - 20  -->  0 - 7   (multiply by 0.35)
-            // Scale 0 - 20  -->  0 - 15  (multiply by 0.75)
-            //      15 / 20 = 0.75
-            //      7  / 20 = 0.35
-            cellX = Mathf.RoundToInt((mousePos.x + 10) * widthDivide);
-            cellY = Mathf.RoundToInt((mousePos.y + 10) * heightDivide);
-
-            // Test if the click is within bounds
-            if (!(cellX > gridWidth - 1 || cellX < 0 || cellY > gridHeight - 1 || cellY < 0))
-            {
-                Debug.Log(string.Format("Changed texture at ({0}, {1})", cellX, cellY));
-            }
-            else
-            {
-                Debug.Log(string.Format("({0}, {1}) is not in the grid", cellX, cellY));
-            }
+            InvokeRepeating("Step", 0.0f, generationSpeed);
         }
-    }
-    */
+        else if (!playing && IsInvoking())
+        {
+            CancelInvoke();
+        }
+	}
 
 	private void OnDestroy()
     {
