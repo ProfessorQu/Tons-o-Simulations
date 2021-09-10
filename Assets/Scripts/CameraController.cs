@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class CameraController : MonoBehaviour
+public class CameraController : MonoBehaviour//, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
 	public int zoomSpeed = 1;
 	public int dragSpeed = 1;
@@ -33,14 +34,6 @@ public class CameraController : MonoBehaviour
 		if (cam.orthographicSize - mouseScroll > 0)
 		{
 			cam.orthographicSize -= mouseScroll * Time.deltaTime * zoomSpeed;
-		}
-
-		if (Input.GetMouseButton(0))
-		{
-			Vector2 pos = Camera.main.ScreenToViewportPoint((Vector2)Input.mousePosition - screenMiddle);
-			Vector2 move = pos * Time.deltaTime * dragSpeed * cam.orthographicSize;
-
-			transform.Translate(-move, Space.World);
 		}
 
 		if (Input.GetMouseButtonDown(1))

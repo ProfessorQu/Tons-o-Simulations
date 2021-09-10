@@ -27,7 +27,6 @@ public class GameOfLife : MonoBehaviour
     RenderTexture pingTexture;
     RenderTexture pongTexture;
 
-    // Set 2D texture
     public Texture2D tex2D;
 
     // Set material
@@ -72,9 +71,6 @@ public class GameOfLife : MonoBehaviour
         pongTexture.enableRandomWrite = true;
         pongTexture.filterMode = FilterMode.Point;
         pongTexture.Create();
-
-        // Create texture 2D
-        tex2D = new Texture2D(gridWidth, gridHeight, TextureFormat.ARGB32, false);
 
         // Get kernel
         kernel = shader.FindKernel("CSMain");
@@ -145,7 +141,7 @@ public class GameOfLife : MonoBehaviour
     }
 
     /*
-	private void Update()
+    private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -165,31 +161,15 @@ public class GameOfLife : MonoBehaviour
             // Test if the click is within bounds
             if (!(cellX > gridWidth - 1 || cellX < 0 || cellY > gridHeight - 1 || cellY < 0))
             {
-                RenderTexture tex = (pingpong) ? pingTexture : pongTexture;
-                // Set the active rendertexture
-                RenderTexture.active = tex;
-
-                // Read the pixels
-                tex2D.ReadPixels(new Rect(0, 0, gridWidth, gridHeight), 0, 0);
-                // Set pixel
-                tex2D.SetPixel(cellX, cellY, new Color(1, 1, 1));
-                // Apply texture
-                tex2D.Apply();
-
-                // Copy texture
-                Graphics.Blit(tex2D, tex);
-
-                // Unset the active rendertexture
-                RenderTexture.active = null;
-
                 Debug.Log(string.Format("Changed texture at ({0}, {1})", cellX, cellY));
             }
             else
             {
                 Debug.Log(string.Format("({0}, {1}) is not in the grid", cellX, cellY));
-			}
+            }
         }
-    }*/
+    }
+    */
 
 	private void OnDestroy()
     {
