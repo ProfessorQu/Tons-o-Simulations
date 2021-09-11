@@ -9,7 +9,10 @@ public class GameOfLife : MonoBehaviour
     private int kernel;
 
     // Set grid width and height
-    [Min(1)] public int gridSize = 1;
+    [Min(1)] public int gridWidth = 1;
+    [Min(1)] public int gridHeight = 1;
+
+    public float defaultSize = 20;
 
     [Range(0, 1)] public float valueToBeAlive = 0.75f;
 
@@ -17,8 +20,9 @@ public class GameOfLife : MonoBehaviour
 
     public float generationSpeed;
 
-    // Calculate groups
-    int groups;
+    // Set groups
+    int xGroups;
+    int yGroups;
 
     // Set pingpong bool
     private bool pingpong = true;
@@ -50,17 +54,18 @@ public class GameOfLife : MonoBehaviour
         pingpong = true;
 
         // Calculate kernel groups
-        groups = Mathf.CeilToInt(gridSize / 8f);
+        xGroups = Mathf.CeilToInt(gridWidth / 8f);
+        yGroups = Mathf.CeilToInt(gridHeight / 8f);
 
         // Create ping texture
-        pingTexture = new RenderTexture(gridSize, gridSize, 24);
+        pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
         pingTexture.wrapMode = TextureWrapMode.Repeat;
         pingTexture.enableRandomWrite = true;
         pingTexture.filterMode = FilterMode.Point;
         pingTexture.Create();
 
         // Create pong texture
-        pongTexture = new RenderTexture(gridSize, gridSize, 24);
+        pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
         pongTexture.wrapMode = TextureWrapMode.Repeat;
         pongTexture.enableRandomWrite = true;
         pongTexture.filterMode = FilterMode.Point;
@@ -70,14 +75,17 @@ public class GameOfLife : MonoBehaviour
         kernel = shader.FindKernel("CSMain");
 
         // Set width and height
-        shader.SetInt("_Width", gridSize);
-        shader.SetInt("_Height", gridSize);
+        shader.SetInt("_Width", gridWidth);
+        shader.SetInt("_Height", gridHeight);
 
         // Get material
         mat = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
 
-        CancelInvoke();
+        float aspectRatio = (float)gridWidth / (float)gridHeight;
 
+        transform.localScale = new Vector3(defaultSize * aspectRatio, defaultSize, 1);
+
+        CancelInvoke();
         InvokeRepeating("Step", 0.0f, generationSpeed);
     }
 
@@ -96,7 +104,7 @@ public class GameOfLife : MonoBehaviour
         // Pass value to be alive
         shader.SetFloat("_ValueToBeAlive", valueToBeAlive);
         // Run init shader
-        shader.Dispatch(initKernel, groups, groups, 1);
+        shader.Dispatch(initKernel, xGroups, yGroups, 1);
         // Render image
         Step();
     }
@@ -110,7 +118,7 @@ public class GameOfLife : MonoBehaviour
             shader.SetTexture(kernel, "Result", pongTexture);
 
             // Run shader
-            shader.Dispatch(kernel, groups, groups, 1);
+            shader.Dispatch(kernel, xGroups, yGroups, 1);
 
             // Set material
             mat.mainTexture = pingTexture;
@@ -122,7 +130,7 @@ public class GameOfLife : MonoBehaviour
             shader.SetTexture(kernel, "Result", pingTexture);
 
             // Run shader
-            shader.Dispatch(kernel, groups, groups, 1);
+            shader.Dispatch(kernel, xGroups, yGroups, 1);
 
             // Set material
             mat.mainTexture = pongTexture;
@@ -138,7 +146,7 @@ public class GameOfLife : MonoBehaviour
         {
             InvokeRepeating("Step", 0.0f, generationSpeed);
         }
-        else if (!playing && IsInvoking())
+        else if (!playing)
         {
             CancelInvoke();
         }
