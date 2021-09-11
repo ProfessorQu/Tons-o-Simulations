@@ -34,7 +34,7 @@ public class CameraController : MonoBehaviour
 
 		if (cam.orthographicSize - mouseScroll > 0)
 		{
-			cam.orthographicSize -= mouseScroll * Time.deltaTime * zoomSpeed;
+			cam.orthographicSize -= mouseScroll * Time.deltaTime * zoomSpeed * cam.orthographicSize;
 		}
 
 		if (Input.GetMouseButtonDown(0) && !dragging)

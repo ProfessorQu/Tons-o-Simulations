@@ -43,33 +43,29 @@ public class GameOfLife : MonoBehaviour
 
     public void Setup()
     {
-        // Set textures to null
-        pingTexture = null;
-        pongTexture = null;
-
-        // Set material to null
-        mat = null;
-
-        // Reset pingpong
-        pingpong = true;
-
         // Calculate kernel groups
         xGroups = Mathf.CeilToInt(gridWidth / 8f);
         yGroups = Mathf.CeilToInt(gridHeight / 8f);
 
-        // Create ping texture
-        pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
-        pingTexture.wrapMode = TextureWrapMode.Repeat;
-        pingTexture.enableRandomWrite = true;
-        pingTexture.filterMode = FilterMode.Point;
-        pingTexture.Create();
+        if (pingTexture == null)
+        {
+            // Create ping texture
+            pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
+            pingTexture.wrapMode = TextureWrapMode.Repeat;
+            pingTexture.enableRandomWrite = true;
+            pingTexture.filterMode = FilterMode.Point;
+            pingTexture.Create();
+        }
 
-        // Create pong texture
-        pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
-        pongTexture.wrapMode = TextureWrapMode.Repeat;
-        pongTexture.enableRandomWrite = true;
-        pongTexture.filterMode = FilterMode.Point;
-        pongTexture.Create();
+        if (pongTexture == null)
+        {
+            // Create pong texture
+            pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
+            pongTexture.wrapMode = TextureWrapMode.Repeat;
+            pongTexture.enableRandomWrite = true;
+            pongTexture.filterMode = FilterMode.Point;
+            pongTexture.Create();
+        }
 
         // Get kernel
         kernel = shader.FindKernel("CSMain");
@@ -86,11 +82,12 @@ public class GameOfLife : MonoBehaviour
         transform.localScale = new Vector3(defaultSize * aspectRatio, defaultSize, 1);
 
         CancelInvoke();
-        InvokeRepeating("Step", 0.0f, generationSpeed);
     }
 
     public void Randomize()
     {
+        Clear();
+
         // Init simulation
         int initKernel = shader.FindKernel("CSInit");
 
@@ -105,8 +102,6 @@ public class GameOfLife : MonoBehaviour
         shader.SetFloat("_ValueToBeAlive", valueToBeAlive);
         // Run init shader
         shader.Dispatch(initKernel, xGroups, yGroups, 1);
-        // Render image
-        Step();
     }
 
 	public void Step()
@@ -140,7 +135,33 @@ public class GameOfLife : MonoBehaviour
         pingpong = !pingpong;
     }
 
-	private void Update()
+    public void Clear()
+    {
+        pingpong = true;
+
+        // Create ping texture
+        pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
+        pingTexture.wrapMode = TextureWrapMode.Repeat;
+        pingTexture.enableRandomWrite = true;
+        pingTexture.filterMode = FilterMode.Point;
+        pingTexture.Create();
+
+        // Create pong texture
+        pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
+        pongTexture.wrapMode = TextureWrapMode.Repeat;
+        pongTexture.enableRandomWrite = true;
+        pongTexture.filterMode = FilterMode.Point;
+        pongTexture.Create();
+
+        mat.mainTexture = pingTexture;
+    }
+
+    public void Play()
+    {
+        playing = !playing;
+    }
+
+    private void Update()
 	{
 		if (playing && !IsInvoking())
         {
