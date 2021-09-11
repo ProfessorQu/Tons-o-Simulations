@@ -1329,7 +1329,7 @@ MonoBehaviour:
   defaultSize: 100
   valueToBeAlive: 0.9
   playing: 0
-  generationSpeed: 1
+  generationSpeed: 0.1
 --- !u!33 &1109379508
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -2584,7 +2584,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0dc2be980b45de40a039884546cf9b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  zoomSpeed: 20
+  zoomSpeed: 5
   dragSpeed: 0.01
   gameOfLife: {fileID: 1109379507}
 --- !u!20 &1687258584

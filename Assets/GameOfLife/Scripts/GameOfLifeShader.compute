@@ -36,10 +36,11 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 {
     float4 neigborCells = float4(0, 0, 0, 1);
     
+    // Test if negetive X or positive X is allowed
     bool negY = id.y != 0;
     bool posY = id.y != _Height;
     
-    
+    // Test if negetive Y or positive Y is allowed
     bool negX = id.x != 0;
     bool posX = id.x != _Width;
     

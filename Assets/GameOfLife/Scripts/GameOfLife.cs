@@ -38,7 +38,6 @@ public class GameOfLife : MonoBehaviour
     private void Start()
     {
         Setup();
-        Randomize();
     }
 
     public void Setup()
@@ -47,9 +46,9 @@ public class GameOfLife : MonoBehaviour
         xGroups = Mathf.CeilToInt(gridWidth / 8f);
         yGroups = Mathf.CeilToInt(gridHeight / 8f);
 
+        // Create ping texture
         if (pingTexture == null)
         {
-            // Create ping texture
             pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
             pingTexture.wrapMode = TextureWrapMode.Repeat;
             pingTexture.enableRandomWrite = true;
@@ -57,9 +56,9 @@ public class GameOfLife : MonoBehaviour
             pingTexture.Create();
         }
 
+        // Create pong texture
         if (pongTexture == null)
         {
-            // Create pong texture
             pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
             pongTexture.wrapMode = TextureWrapMode.Repeat;
             pongTexture.enableRandomWrite = true;
@@ -77,15 +76,17 @@ public class GameOfLife : MonoBehaviour
         // Get material
         mat = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
 
+        // Calculate the ascpect ratio and apply it
         float aspectRatio = (float)gridWidth / (float)gridHeight;
-
         transform.localScale = new Vector3(defaultSize * aspectRatio, defaultSize, 1);
 
+        // Cancel playing
         CancelInvoke();
     }
 
     public void Randomize()
     {
+        // Clear the screen
         Clear();
 
         // Init simulation
@@ -137,36 +138,41 @@ public class GameOfLife : MonoBehaviour
 
     public void Clear()
     {
+        // Set pingpong
         pingpong = true;
 
-        // Create ping texture
+        // Reset ping texture
         pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
         pingTexture.wrapMode = TextureWrapMode.Repeat;
         pingTexture.enableRandomWrite = true;
         pingTexture.filterMode = FilterMode.Point;
         pingTexture.Create();
 
-        // Create pong texture
+        // Reset pong texture
         pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
         pongTexture.wrapMode = TextureWrapMode.Repeat;
         pongTexture.enableRandomWrite = true;
         pongTexture.filterMode = FilterMode.Point;
         pongTexture.Create();
 
+        // Set main texture
         mat.mainTexture = pingTexture;
     }
 
     public void Play()
     {
+        // Invert playing
         playing = !playing;
     }
 
     private void Update()
 	{
+        // If it should be playing, invoke repeating
 		if (playing && !IsInvoking())
         {
             InvokeRepeating("Step", 0.0f, generationSpeed);
         }
+        // If not playing cancel invoke
         else if (!playing)
         {
             CancelInvoke();
