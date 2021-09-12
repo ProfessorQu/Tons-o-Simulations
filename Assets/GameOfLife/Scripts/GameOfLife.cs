@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameOfLife : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class GameOfLife : MonoBehaviour
     [Range(0, 1)] public float valueToBeAlive = 0.75f;
 
     [HideInInspector] public bool playing = false;
+    [HideInInspector] public int gen = 0;
 
     public float generationSpeed;
 
@@ -30,7 +32,8 @@ public class GameOfLife : MonoBehaviour
     RenderTexture pingTexture;
     RenderTexture pongTexture;
 
-    // public Texture2D tex2D;
+    // Get text of the generation
+    public Text generation;
 
     // Set material
     private Material mat;
@@ -134,6 +137,10 @@ public class GameOfLife : MonoBehaviour
 
         // Invert pingpong
         pingpong = !pingpong;
+
+        // Update generation
+        gen++;
+        generation.text = "Generation: " + gen;
     }
 
     public void Clear()
@@ -157,6 +164,10 @@ public class GameOfLife : MonoBehaviour
 
         // Set main texture
         mat.mainTexture = pingTexture;
+
+        // Set generation to 0
+        gen = 0;
+        generation.text = "Generation: " + gen;
     }
 
     public void Play()

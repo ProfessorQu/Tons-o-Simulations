@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Controls : MonoBehaviour
+public class UIHandler : MonoBehaviour
 {
 	// Get Game of Life
 	public GameOfLife gameOfLife;
