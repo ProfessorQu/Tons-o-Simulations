@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
@@ -7,8 +9,7 @@ Shader "Unlit/Raymarch"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Centre ("Center", Vector) = (0, 0, 0, 0)
-        _Radius ("Radius", Float) = 1
+        _Sphere ("Sphere", Vector) = (0, 0, 0, 1)
         _WorldSpace ("World Space", Range(0, 1)) = 1
     }
     SubShader
@@ -47,8 +48,7 @@ Shader "Unlit/Raymarch"
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-            float3 _Centre;
-            float _Radius;
+            float4 _Sphere;
 
             float _WorldSpace;
 
@@ -63,7 +63,7 @@ Shader "Unlit/Raymarch"
             }
 
             float signedSphereDistance(float3 p) {
-                return distance(p, _Centre) - _Radius;
+                return distance(fmod(p, 1), _Sphere.xyz) - _Sphere.w;
             }
 
             float raymarch(float3 position, float3 direction)
@@ -71,7 +71,7 @@ Shader "Unlit/Raymarch"
                 for (int i = 0; i < MAX_STEPS; i++) {
                     float distance = signedSphereDistance(position);
                     if (distance < MIN_DIST)
-                        //return (i + 1) / (float) MAX_STEPS;
+                        // return (i + 1) / (float) MAX_STEPS;
                         return fixed4(1, 1, 1, 1);
 
                     position += distance * direction;
