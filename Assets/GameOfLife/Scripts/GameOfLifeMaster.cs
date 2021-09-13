@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameOfLife : MonoBehaviour
+public class GameOfLifeMaster : MonoBehaviour
 {
     // Set shader and kernel
     public ComputeShader shader;

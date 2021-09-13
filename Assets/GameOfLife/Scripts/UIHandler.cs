@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class UIHandler : MonoBehaviour
 {
 	// Get Game of Life
-	public GameOfLife gameOfLife;
+	public GameOfLifeMaster gameOfLife;
 
 	// Get input fields for grid width and grid height
 	public InputField gridWidthInput;
