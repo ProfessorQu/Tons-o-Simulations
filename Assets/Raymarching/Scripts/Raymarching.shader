@@ -88,7 +88,6 @@ Shader "Raymarching/Raymarching"
                     t += d;
                 }
 
-
                 return result;
             }
 
