@@ -17,12 +17,19 @@ Shader "Raymarching/Raymarching"
             #pragma target 3.0
 
             #include "UnityCG.cginc"
+            #include "DistanceFunctions.cginc"
 
             sampler2D _MainTex;
+            uniform sampler2D _CameraDepthTexture;
             uniform float4x4 _CamFrustum, _CamToWorld;
-            uniform float _maxDistance;
 
-            uniform float4 _sphere;
+            uniform float _MaxDistance;
+            uniform float3 _LightDir;
+
+            uniform float4 sphere;
+            uniform float4 box;
+            uniform float4 color;
+            uniform float blendStrength;
 
             struct appdata
             {
@@ -53,35 +60,49 @@ Shader "Raymarching/Raymarching"
                 return o;
             }
 
-            float SphereSDF(float3 p, float s) {
-                return length(p) - s;
+            float DistanceField(float3 p) {
+                //float plane1 = dot(p, normalize(float3(0, 1, 0)));
+                
+                float sphere1 = sdSphere(p - sphere.xyz, sphere.w);
+                float box1 = sdBox(p - box.xyz, box.w);
+
+                return OpUS(sphere1, box1, blendStrength);
             }
 
-            float SceneSDF(float3 p) {
-                float sphere = SphereSDF(p - _sphere.xyz, _sphere.w);
+            float3 GetNormal(float3 p) {
+                const float2 offset = float2(0.001, 0);
 
-                return sphere;
+                float3 n = float3(
+                    DistanceField(p + offset.xyy) - DistanceField(p - offset.xyy),
+                    DistanceField(p + offset.yxy) - DistanceField(p - offset.yxy),
+                    DistanceField(p + offset.yyx) - DistanceField(p - offset.yyx)
+                );
+
+                return normalize(n);
             }
 
-            fixed4 raymarching(float3 ro, float3 rd) {
+            fixed4 raymarching(float3 ro, float3 rd, float depth) {
                 fixed4 result = fixed4(1, 1, 1, 1);
-                const int maxIteration = 64;
+                const int maxIteration = 1024;
                 float t = 0; // distance travelled along the ray direction
 
                 for (int i = 0; i < maxIteration; i++) {
-                    if (t > _maxDistance) {
+                    if (t > _MaxDistance || t >= depth) {
                         // Environment
-                        result = fixed4(rd, 1);
+                        result = fixed4(rd, 0);
                         break;
                     }
 
                     float3 p = ro + rd * t;
                     // Check for hit
-                    float d = SceneSDF(p);
+                    float d = DistanceField(p);
 
                     if (d < 0.01){ // We have hit something
                         // Shading!
-                        result = fixed4(1, 1, 1, 1);
+                        float3 n = GetNormal(p);
+                        float light = dot(-_LightDir, n);
+
+                        result = fixed4(color.rgb * light, 1);
                         break;
                     }
 
@@ -93,12 +114,17 @@ Shader "Raymarching/Raymarching"
 
             fixed4 frag (v2f i) : SV_Target
             {
+                float depth = LinearEyeDepth(tex2D(_CameraDepthTexture, i.uv).r);
+                depth *= length(i.ray);
+
+                fixed3 col = tex2D(_MainTex, i.uv);
+                
                 float3 rayDirection = normalize(i.ray.xyz);
                 float3 rayOrigin = _WorldSpaceCameraPos;
 
-                fixed4 result = raymarching(rayOrigin, rayDirection);
+                fixed4 result = raymarching(rayOrigin, rayDirection, depth);
 
-                return result;
+                return fixed4(col * (1.0 - result.w) + result.xyz * result.w, 1.0);
             }
             ENDCG
         }

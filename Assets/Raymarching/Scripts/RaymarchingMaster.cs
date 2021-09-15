@@ -4,7 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
 [ExecuteInEditMode]
-public class RaymarchingMaster : MonoBehaviour
+public class RaymarchingMaster : SceneViewFilter
 {
 	public Shader shader;
 
@@ -38,12 +38,17 @@ public class RaymarchingMaster : MonoBehaviour
 
 	private Camera _cam;
 
+	public Light directionalLight;
+
 	public float maxDistance;
-	public Vector4 sphere;
+	public Vector4 sphere, box;
+	public Color color;
+
+	public float blendStrength;
 
 	private void OnRenderImage(RenderTexture source, RenderTexture destination)
 	{
-		if (!_raymarchMaterial)
+		if (!raymarchMaterial)
 		{
 			Graphics.Blit(source, destination);
 			return;
@@ -51,11 +56,18 @@ public class RaymarchingMaster : MonoBehaviour
 
 		_raymarchMaterial.SetMatrix("_CamFrustum", CamFrustum(cam));
 		_raymarchMaterial.SetMatrix("_CamToWorld", cam.cameraToWorldMatrix);
-		_raymarchMaterial.SetFloat("_maxDistance", maxDistance);
 
-		_raymarchMaterial.SetVector("_sphere", sphere);
+		_raymarchMaterial.SetFloat("_MaxDistance", maxDistance);
+		_raymarchMaterial.SetVector("_LightDir", directionalLight ? directionalLight.transform.forward : Vector3.down);
+
+		_raymarchMaterial.SetVector("sphere", sphere);
+		_raymarchMaterial.SetVector("box", box);
+
+		_raymarchMaterial.SetColor("color", color);
+		_raymarchMaterial.SetFloat("blendStrength", blendStrength);
 
 		RenderTexture.active = destination;
+		_raymarchMaterial.SetTexture("_MainTex", source);
 		GL.PushMatrix();
 		GL.LoadOrtho();
 		_raymarchMaterial.SetPass(0);
