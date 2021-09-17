@@ -6,14 +6,15 @@ using UnityEngine.UI;
 public class UIHandler : MonoBehaviour
 {
 	// Get Game of Life
-	public GameOfLifeMaster gameOfLife;
+	public GOLMaster gameOfLife;
 
 	// Get input fields for grid width and grid height
 	public InputField gridWidthInput;
 	public InputField gridHeightInput;
 
 	// Get input field for generation speed
-	public InputField generationSpeedInput;
+	public Slider generationSpeedInput;
+	public Text generationSpeedText;
 
 	[Space]
 
@@ -32,7 +33,6 @@ public class UIHandler : MonoBehaviour
 
 	private float generationSpeed;
 
-
 	// Look if option menu is open or closed
 	private bool optionsOpen = false;
 
@@ -42,8 +42,8 @@ public class UIHandler : MonoBehaviour
 		gridWidthInput.text = gameOfLife.gridWidth.ToString();
 		gridHeightInput.text = gameOfLife.gridHeight.ToString();
 
-		generationSpeedInput.text = gameOfLife.generationSpeed.ToString();
-
+		generationSpeedInput.value = gameOfLife.generationSpeed;
+		generationSpeedText.text = gameOfLife.generationSpeed.ToString();
 
 		// Set game and option menu active
 		game.SetActive(!optionsOpen);
@@ -54,17 +54,31 @@ public class UIHandler : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.Escape))
 		{
-			// Toggle option menu open
-			optionsOpen = !optionsOpen;
-
-			// Set game and option menu active
-			game.SetActive(!optionsOpen);
-			options.SetActive(optionsOpen);
+			ToggleOptions();
 		}
 
+		if(Input.GetKeyDown(KeyCode.F1)){
+			if(game.activeInHierarchy){
+				game.SetActive(false);
+			}
+			else if (!options.activeInHierarchy)
+			{
+				game.SetActive(true);
+			}
+		}
 
 		// Set play text
 		play.text = gameOfLife.playing ? "Stop" : "Play";
+	}
+
+	public void ToggleOptions()
+	{
+		// Toggle option menu open
+		optionsOpen = !optionsOpen;
+
+		// Set game and option menu active
+		game.SetActive(!optionsOpen);
+		options.SetActive(optionsOpen);
 	}
 
 	public void Submit()
@@ -73,18 +87,14 @@ public class UIHandler : MonoBehaviour
 		int width;
 		int height;
 
-		float genSpeed;
-
-
 		// Test for successes for width and height conversion
 		bool widthSuccess = int.TryParse(gridWidthInput.text, out width) && width > 0 && width != gridWidth;
 		bool heightSuccess = int.TryParse(gridHeightInput.text, out height) && height > 0 && height != gridHeight;
 
-		// Replace "." with ","
-		string genSpeedString = generationSpeedInput.text.Replace(".", ",");
+		float genSpeed = generationSpeedInput.value;
 
 		// Test for success for generation speed conversion
-		bool genSpeedSuccess = float.TryParse(genSpeedString, out genSpeed) && genSpeed > 0.00001 && genSpeed <= 1 && genSpeed != generationSpeed;
+		bool genSpeedSuccess = genSpeed > 0.00001 && genSpeed <= 1 && genSpeed != generationSpeed;
 
 		// If width success, set gridwidth
 		if (widthSuccess)
@@ -115,11 +125,13 @@ public class UIHandler : MonoBehaviour
 		{
 			gameOfLife.generationSpeed = genSpeed;
 			generationSpeed = genSpeed;
+
+			generationSpeedText.text = ((int)genSpeed).ToString();
 		}
 		// If no success, reset the text
 		else
 		{
-			generationSpeedInput.text = gameOfLife.generationSpeed.ToString();
+			generationSpeedInput.value = gameOfLife.generationSpeed;
 		}
 
 		// If width or height is a success reset entire board

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(GameOfLifeMaster))]
+[CustomEditor(typeof(GOLMaster))]
 public class GameOfLifeEditor : Editor
 {
-	private GameOfLifeMaster gameOfLife;
+	private GOLMaster gameOfLife;
 
 	public override void OnInspectorGUI()
 	{
@@ -14,7 +14,7 @@ public class GameOfLifeEditor : Editor
 		base.OnInspectorGUI();
 
 		// Set target
-		gameOfLife = (GameOfLifeMaster)target;
+		gameOfLife = (GOLMaster)target;
 
 		// Begin horizontal
 		GUILayout.BeginHorizontal();

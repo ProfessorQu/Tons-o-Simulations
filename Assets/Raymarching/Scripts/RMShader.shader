@@ -26,10 +26,7 @@ Shader "Raymarching/Raymarching"
             uniform float _MaxDistance;
             uniform float3 _LightDir;
 
-            uniform float4 sphere;
-            uniform float4 box;
-            uniform float4 color;
-            uniform float blendStrength;
+            uniform int shape;
 
             struct appdata
             {
@@ -60,22 +57,56 @@ Shader "Raymarching/Raymarching"
                 return o;
             }
 
-            float DistanceField(float3 p) {
-                //float plane1 = dot(p, normalize(float3(0, 1, 0)));
-                
-                float sphere1 = sdSphere(p - sphere.xyz, sphere.w);
-                float box1 = sdBox(p - box.xyz, box.w);
+            float sinDist(float3 p) {
+                return sin(p.x) * sin(p.y) * sin(p.z);
+            }
 
-                return OpUS(sphere1, box1, blendStrength);
+            float4 DistanceField(float3 p) {
+                if (shape == 0) {
+                    return float4(1, 1, 1, sdSphere(p, 1));
+                }
+                else if (shape == 1) {
+                    return float4(0, 0, 1, sdBox(p, 1));
+                }
+                else if (shape == 2) {
+                    pMod(p.x, 6);
+                    pMod(p.y, 6);
+                    pMod(p.z, 6);
+
+                    return float4(1, 0, 0, sdSphere(p, 1));
+                }
+                else if (shape == 3) {
+                    pMod(p.x, 6);
+                    pMod(p.y, 6);
+                    pMod(p.z, 6);
+
+                    return float4(0, 1, 0, sdBox(p, 1));
+                }
+                else if (shape == 4) {
+                    pMod(p.x, 4);
+                    pMod(p.y, 4);
+                    pMod(p.z, 4);
+
+                    float sphere = sdSphere(p, 2.5);
+                    float box = sdBox(p, 2);
+
+                    return float4(1, 1, 1, OpS(sphere, box));
+                }
+                else if (shape == 5) {
+                    return float4(0, 1, 1, sin(p.x) + sin(p.y) + sin(p.z));
+                }
+                else {
+                    return 1;
+                }
             }
 
             float3 GetNormal(float3 p) {
                 const float2 offset = float2(0.001, 0);
 
                 float3 n = float3(
-                    DistanceField(p + offset.xyy) - DistanceField(p - offset.xyy),
-                    DistanceField(p + offset.yxy) - DistanceField(p - offset.yxy),
-                    DistanceField(p + offset.yyx) - DistanceField(p - offset.yyx)
+                    DistanceField(p + offset.xyy).w - DistanceField(p - offset.xyy).w,
+                    DistanceField(p + offset.yxy).w - DistanceField(p - offset.yxy).w,
+                    DistanceField(p + offset.yyx).w - DistanceField(p - offset.yyx).w
                 );
 
                 return normalize(n);
@@ -95,14 +126,17 @@ Shader "Raymarching/Raymarching"
 
                     float3 p = ro + rd * t;
                     // Check for hit
-                    float d = DistanceField(p);
+                    float4 info = DistanceField(p);
+
+                    float3 color = info.rgb;
+                    float d = info.w;
 
                     if (d < 0.01){ // We have hit something
                         // Shading!
                         float3 n = GetNormal(p);
                         float light = dot(-_LightDir, n);
 
-                        result = fixed4(color.rgb * light, 1);
+                        result = fixed4(color * light, 1);
                         break;
                     }
 

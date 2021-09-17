@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CameraController : MonoBehaviour
+public class GOLCameraController : MonoBehaviour
 {
 	// Set variables to be used as speeds
 	public float zoomSpeed = 1;

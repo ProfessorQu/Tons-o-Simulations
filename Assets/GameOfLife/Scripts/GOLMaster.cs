@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameOfLifeMaster : MonoBehaviour
+public class GOLMaster: MonoBehaviour
 {
     // Set shader and kernel
     public ComputeShader shader;

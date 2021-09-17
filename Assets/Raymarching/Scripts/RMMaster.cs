@@ -2,9 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Camera))]
-[ExecuteInEditMode]
-public class RaymarchingMaster : SceneViewFilter
+[RequireComponent(typeof(Camera)), ExecuteInEditMode]
+public class RMMaster : SceneViewFilter
 {
 	public Shader shader;
 
@@ -41,10 +40,9 @@ public class RaymarchingMaster : SceneViewFilter
 	public Light directionalLight;
 
 	public float maxDistance;
-	public Vector4 sphere, box;
-	public Color color;
 
-	public float blendStrength;
+	public enum Shape { Sphere, Cube, InfiniteSpheres, InfiniteCubes, InfiniteTunnels, InfiniteSmoothTunnels };
+	public Shape shape;
 
 	private void OnRenderImage(RenderTexture source, RenderTexture destination)
 	{
@@ -60,11 +58,7 @@ public class RaymarchingMaster : SceneViewFilter
 		_raymarchMaterial.SetFloat("_MaxDistance", maxDistance);
 		_raymarchMaterial.SetVector("_LightDir", directionalLight ? directionalLight.transform.forward : Vector3.down);
 
-		_raymarchMaterial.SetVector("sphere", sphere);
-		_raymarchMaterial.SetVector("box", box);
-
-		_raymarchMaterial.SetColor("color", color);
-		_raymarchMaterial.SetFloat("blendStrength", blendStrength);
+		_raymarchMaterial.SetInt("shape", (int)shape);
 
 		RenderTexture.active = destination;
 		_raymarchMaterial.SetTexture("_MainTex", source);
