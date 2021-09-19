@@ -1,11 +1,9 @@
 fileFormatVersion: 2
-guid: 522c64979382815469e0f63d66b02089
+guid: be9a297a8221c494dbd2ec2b6de4b63e
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences:
-  - shader: {fileID: 4800000, guid: ae9cacfffecff544b9fb2ea1ba83f00f, type: 3}
-  - directionalLight: {instanceID: 0}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
