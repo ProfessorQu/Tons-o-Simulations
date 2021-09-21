@@ -4,12 +4,19 @@ using UnityEngine;
 
 public class RMShape : MonoBehaviour
 {
-	public Color color;
-	public enum Shape { Sphere, Cube, Plane };
-    public enum Operation { Union, Subtraction, Intersection }
+	public enum Shape { Sphere, Cube, Torus, Plane };
+    public enum Operation { Union, Subtraction, Intersection, SmoothUnion, SmoothSubtraction, SmoothIntersection }
 
+    [Header("Characteristics")]
     public Shape type;
     public Operation operation;
+
+    [Header("Repeating")]
+    public Vector3 repeat;
+    public Vector3 repeatInterval;
+
+    [Header("Color")]
+    public Color color = Color.white;
 
     public Vector3 position
     {

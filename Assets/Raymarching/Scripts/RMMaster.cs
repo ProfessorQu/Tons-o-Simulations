@@ -65,7 +65,11 @@ public class RMMaster : SceneViewFilter
 	public float aOIntensity;
 
 	[Header("Signed Distance Field")]
-	public Color color;
+	public float colorIntensity;
+	public float blendStrength;
+
+	public Vector3 repeatAxis;
+	public Vector3 repeatInterval;
 
 
 	private void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -75,6 +79,8 @@ public class RMMaster : SceneViewFilter
 			Graphics.Blit(source, destination);
 			return;
 		}
+
+		CreateScene();
 
 		_raymarchMaterial.SetMatrix("_CamFrustum", CamFrustum(cam));
 		_raymarchMaterial.SetMatrix("_CamToWorld", cam.cameraToWorldMatrix);
@@ -95,9 +101,11 @@ public class RMMaster : SceneViewFilter
 		_raymarchMaterial.SetInt("_AoIterations", aOIterations);
 		_raymarchMaterial.SetFloat("_AoIntensity", aOIntensity);
 
-		_raymarchMaterial.SetColor("color", color);
+		_raymarchMaterial.SetFloat("_ColorIntensity", colorIntensity);
+		_raymarchMaterial.SetFloat("_BlendStrength", blendStrength);
 
-		CreateScene();
+		_raymarchMaterial.SetVector("_RepeatAxis", repeatAxis);
+		_raymarchMaterial.SetVector("_RepeatInterval", repeatInterval);
 
 		RenderTexture.active = destination;
 		_raymarchMaterial.SetTexture("_MainTex", source);
@@ -131,21 +139,44 @@ public class RMMaster : SceneViewFilter
 		List<RMShape> shapes = new List<RMShape>(FindObjectsOfType<RMShape>());
 		shapes.Sort((a, b) => a.operation.CompareTo(b.operation));
 
-		List<Vector4> positions = new List<Vector4>();
-		List<float> types = new List<float>();
-		List<float> operations = new List<float>();
+		Vector4[] positions = new Vector4[100];
+		Vector4[] scales = new Vector4[100];
 
-		foreach (var shape in shapes)
+		float[] types = new float[100];
+		float[] operations = new float[100];
+
+		Color[] colors = new Color[100];
+
+		for (int i = 0; i < shapes.Count; i++)
 		{
-			positions.Add(shape.position);
-			types.Add((int)shape.type);
-			operations.Add((int)shape.operation);
+			var shape = shapes[i];
+
+			positions[i] = shape.position;
+
+			scales[i] = shape.scale;
+
+			types[i] = (float)shape.type;
+			operations[i] = (float)shape.operation;
+
+			colors[i] = shape.color;
+
+			if (shape.type == RMShape.Shape.Plane)
+				scales[i] = new Vector3(0, 1, 0);
 		}
 
+		/*
+		 * Scales
+		 * Rotations
+		 * Colors
+		 */
 		_raymarchMaterial.SetVectorArray("shapePositions", positions);
+		_raymarchMaterial.SetVectorArray("shapeScales", scales);
+
 		_raymarchMaterial.SetFloatArray("shapeTypes", types);
 		_raymarchMaterial.SetFloatArray("shapeOperations", operations);
-		
+
+		_raymarchMaterial.SetColorArray("shapeColors", colors);
+
 		_raymarchMaterial.SetInt("numShapes", shapes.Count);
 	}
 

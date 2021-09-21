@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIHandler : MonoBehaviour
+public class MBUIHandler : MonoBehaviour
 {
+/*
 	// Get Game of Life
 	public GOLMaster gameOfLife;
 
@@ -146,5 +147,5 @@ public class UIHandler : MonoBehaviour
 		{
 			gameOfLife.CancelInvoke();
 		}
-	}
+	}*/
 }

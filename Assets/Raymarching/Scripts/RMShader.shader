@@ -23,6 +23,7 @@ Shader "Raymarching/Raymarching"
             uniform sampler2D _CameraDepthTexture;
             uniform float4x4 _CamFrustum, _CamToWorld;
 
+            // Setup
             uniform int _MaxIterations;
             uniform float _Accuracy;
             uniform float _MaxDistance;
@@ -41,20 +42,25 @@ Shader "Raymarching/Raymarching"
             uniform int _AoIterations;
             uniform float _AoIntensity;
 
-            uniform float3 color;
+            // Colors
+            uniform float _ColorIntensity;
+            uniform float _BlendStrength;
 
-            /*
-            uniform float4 sphere1;
-            uniform float4 sphere2;
-            uniform float4 box1;
-            uniform float box1Round, sphereBoxSmooth, sphereIntersectSmooth;
-            */
+            // Repeating
+            float3 _RepeatAxis;
+            float3 _RepeatInterval;
+
+            // Shapes
+            float3 shapePositions[100];
+            float3 shapeScales[100];
+
+            int shapeTypes[100];
+            int shapeOperations[100];
+
+            float3 shapeColors[100];
 
             uniform int numShapes;
 
-            uniform float3 shapePositions[100];
-            uniform int shapeTypes[100];
-            uniform int shapeOperations[100];
 
             struct appdata
             {
@@ -85,69 +91,87 @@ Shader "Raymarching/Raymarching"
                 return o;
             }
 
-            float GetShapeDistance(float3 p, int type) {
+            float GetShapeDistance(float3 p,float3 s,int type) {
                 float curShape = 1;
 
                 if (type == 0) {
-                    curShape = sdSphere(p, 1);
+                    curShape = sdSphere(p, s);
                 }
                 else if (type == 1) {
-                    curShape = sdBox(p, 1);
+                    curShape = sdBox(p, s);
                 }
                 else if (type == 2) {
-                    curShape = sdPlane(p, float4(0, 1, 0, 1));
+                    curShape = sdTorus(p, s);
+                }
+                else if (type == 3) {
+                    curShape = sdPlane(p, s);
                 }
 
                 return curShape;
             }
 
-            float Combine(float d1, float d2, int op) {
+            float4 Combine(float4 d1, float4 d2, int op) {
+                float4 combine;
                 if (op == 0) {
-                    return OpU(d1, d2);
+                    combine = Unite(d1, d2);
                 }
                 else if (op == 1) {
-                    return OpS(d1, d2);
+                    combine = Subtract(d1, d2);
                 }
                 else if (op == 2) {
-                    return OpI(d1, d2);
+                    combine = Intersect(d1, d2);
+                }
+                else if (op == 3) {
+                    combine = SmoothUnite(d1, d2, _BlendStrength);
+                }
+                else if (op == 4) {
+                    combine = SmoothSubtract(d1, d2, _BlendStrength);
+                }
+                else if (op == 5) {
+                    combine = SmoothIntersect(d1, d2, _BlendStrength);
                 }
                 
-                return 1;
+                return combine;
             }
 
-            float DistanceField(float3 p) {
-                float dist = 1;
+            float4 DistanceField(float3 p) {
+                float4 dist = 1;
+
+                if (_RepeatAxis.x > 0) {
+                    PositionMod(p.x, _RepeatInterval.x);
+                }
+                if (_RepeatAxis.y > 0) {
+                    PositionMod(p.y, _RepeatInterval.y);
+                }
+                if (_RepeatAxis.z > 0) {
+                    PositionMod(p.z, _RepeatInterval.z);
+                }
 
                 for (int i = 0; i < numShapes; i++) {
                     float3 pos = p - shapePositions[i];
-                    float d = GetShapeDistance(pos, shapeTypes[i]);
+                    float3 scale = shapeScales[i];
 
-                    dist = Combine(d, dist, shapeOperations[i]);
+                    int type = shapeTypes[i];
+                    int operation = shapeOperations[i];
+
+                    float3 color = shapeColors[i];
+
+                    float shapeDist = GetShapeDistance(pos, scale, type);
+                    float4 shape = float4(color, shapeDist);
+
+                    dist = Combine(shape, dist, operation);
                 }
 
                 return dist;
-
-                /*  
-                 *  float dist = 0
-                 *  for object in scene objects:
-                 *      if object.operation == Union:
-                 *          dist = Union(dist, object.distance)
-                 *      else if object.operation == Intersection:
-                 *          dist = Intersection(dist, object.distance)
-                 *      else if object.operation == Subtraction:
-                 *          dist = Subtraction(dist, object.distance)
-                 *
-                 * return dist
-                */
             }
 
             float3 GetNormal(float3 p) {
                 const float2 offset = float2(0.001, 0);
 
                 float3 n = float3(
-                    DistanceField(p + offset.xyy) - DistanceField(p - offset.xyy),
-                    DistanceField(p + offset.yxy) - DistanceField(p - offset.yxy),
-                    DistanceField(p + offset.yyx) - DistanceField(p - offset.yyx)
+                    DistanceField(p + offset.xyy).w - DistanceField(p - offset.xyy).w,
+                    DistanceField(p + offset.yxy).w - DistanceField(p - offset.yxy).w,
+                    DistanceField(p + offset.yyx).w - DistanceField(p - offset.yyx).w
                 );
 
                 return normalize(n);
@@ -155,7 +179,7 @@ Shader "Raymarching/Raymarching"
 
             float HardShadow(float3 ro, float3 rd, float minT, float maxT) {
                 for (float t = minT; t < maxT;) {
-                    float h = DistanceField(ro + rd * t);
+                    float h = DistanceField(ro + rd * t).w;
                     if (h < 0.001) {
                         return 0.0;
                     }
@@ -170,7 +194,7 @@ Shader "Raymarching/Raymarching"
                 float result = 1.0;
 
                 for (float t = minT; t < maxT;) {
-                    float h = DistanceField(ro + rd * t);
+                    float h = DistanceField(ro + rd * t).w;
                     if (h < 0.001) {
                         return 0.0;
                     }
@@ -190,14 +214,15 @@ Shader "Raymarching/Raymarching"
 
                 for (int i = 1; i <= _AoIterations; i++) {
                     dist = step * i;
-                    ao += max(0.0, (dist - DistanceField(p + n * dist))) / dist;
+                    ao += max(0.0, (dist - DistanceField(p + n * dist).w) / dist);
                 }
 
                 return 1 - ao * _AoIntensity;
             }
 
-            float3 Shading(float3 p, float3 n) {
+            float3 Shading(float3 p, float3 n, fixed3 c) {
                 float3 result;
+                float3 color = c.rgb * _ColorIntensity;
                 // Directional Light
                 float3 light = (_LightCol * dot(-_LightDir, n) * 0.5 + 0.5) * _LightIntensity;
 
@@ -208,37 +233,37 @@ Shader "Raymarching/Raymarching"
                 // Ambient Occlusion
                 float ao = AmbientOcclusion(p, n);
 
-                result = color.rgb * light * shadow * ao;
+                result = color.rgb * color.rgb * light * shadow * ao;
 
                 return result;
             }
 
             fixed4 Raymarching(float3 ro, float3 rd, float depth) {
-                fixed4 result = fixed4(1, 1, 1, 1);
+                fixed4 result = 0;
                 const int maxIterations = _MaxIterations;
                 float t = 0; // distance travelled along the ray direction
 
                 for (int i = 0; i < maxIterations; i++) {
                     if (t > _MaxDistance || t >= depth) {
                         // Environment
-                        result = fixed4(rd, 0);
+                        result = 0;
                         break;
                     }
 
                     float3 p = ro + rd * t;
                     // Check for hit
-                    float d = DistanceField(p);
+                    float4 d = DistanceField(p);
 
-                    if (d < _Accuracy){ // We have hit something
+                    if (d.w < _Accuracy) {
                         // Shading!
                         float3 n = GetNormal(p);
-                        float3 s = Shading(p, n);
+                        float3 s = Shading(p, n, d.rgb);
 
                         result = fixed4(s, 1);
                         break;
                     }
 
-                    t += d;
+                    t += d.w;
                 }
 
                 return result;

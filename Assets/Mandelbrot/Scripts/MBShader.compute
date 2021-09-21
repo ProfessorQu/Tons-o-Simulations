@@ -1,0 +1,57 @@
+﻿#pragma kernel CSMain
+
+RWTexture2D<float4> Result;
+
+unsigned int _Width, _Height;
+
+int _MaxIterations;
+
+float4 _Area;
+
+float map(float value, float istart, float istop,
+            float ostart, float ostop)
+{
+    return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+}
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{   
+    float halfWidth = _Width / 2;
+    float halfHeight = _Height / 2;
+    
+    float a = map(id.x, 0, _Width, -1, 1);
+    float b = map(id.y, 0, _Height, -1, 1);
+    
+    float2 ab = float2(a, b);
+    
+    //float ca = -0.8;
+    //float cb = 0.156;
+    float2 c = _Area.xy + ab * _Area.zw;
+    //c = ab;
+    
+    float2 z;
+    
+    int n = 0;
+    
+    for (n = 0; n < _MaxIterations; n++)
+    {
+        float aa = z.x * z.x - z.y * z.y;
+        float bb = 2 * z.x * z.y;
+        
+        z.x = aa + c.x;
+        z.y = bb + c.y;
+        
+        if (length(z) > 2)
+            break;
+    }
+    
+    float bright = sqrt((float) n / _MaxIterations);
+    
+    if (n == _MaxIterations)
+    {
+        bright = 0;
+    }
+    
+    Result[id.xy] = float4(bright, bright, bright, 1.0);
+}
