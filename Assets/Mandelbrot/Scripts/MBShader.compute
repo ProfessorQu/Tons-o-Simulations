@@ -4,9 +4,9 @@ RWTexture2D<float4> Result;
 
 unsigned int _Width, _Height;
 
-int _MaxIterations;
+uniform int _MaxIterations;
 
-float4 _Area;
+uniform float4 _Area;
 
 float map(float value, float istart, float istop,
             float ostart, float ostop)
@@ -14,9 +14,16 @@ float map(float value, float istart, float istop,
     return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
 }
 
+float rgb(float v)
+{
+    return sin(v) * 0.5 + 0.5;
+}
+
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {   
+    Result[id.xy] = float4(0, 0, 0, 0);
+    
     float halfWidth = _Width / 2;
     float halfHeight = _Height / 2;
     
@@ -28,7 +35,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     //float ca = -0.8;
     //float cb = 0.156;
     float2 c = _Area.xy + ab * _Area.zw;
-    //c = ab;
     
     float2 z;
     
@@ -46,12 +52,17 @@ void CSMain(uint3 id : SV_DispatchThreadID)
             break;
     }
     
-    float bright = sqrt((float) n / _MaxIterations);
-    
     if (n == _MaxIterations)
     {
-        bright = 0;
+        Result[id.xy] = float4(0, 0, 0, 1.0);
     }
-    
-    Result[id.xy] = float4(bright, bright, bright, 1.0);
+    else
+    {
+        float v = sqrt((float) n / _MaxIterations);
+        
+        Result[id.xy] = float4(rgb(v * 2), rgb(v * 5), rgb(v * 10), 1.0);
+    }
+    //float v = sqrt((float) n / _MaxIterations);
+    //float bright = (float) n / _MaxIterations;
+    //Result[id.xy] = float4(bright, bright, bright, 1.0);
 }
