@@ -30,7 +30,6 @@ namespace Simulations.GameOfLife{
         RenderTexture pingTexture;
         RenderTexture pongTexture;
 
-
         private Material mat;
 
         private void Start()
@@ -71,7 +70,7 @@ namespace Simulations.GameOfLife{
             float aspectRatio = (float)gridWidth / (float)gridHeight;
             transform.localScale = new Vector3(defaultSize * aspectRatio, defaultSize, 1);
 
-            CancelInvoke();
+            Pause();
         }
 
         public void Randomize()
@@ -139,20 +138,17 @@ namespace Simulations.GameOfLife{
 
         public void Play()
         {
-            playing = !playing;
+            InvokeRepeating("Step", 0.0f, generationSpeed);
+
+            playing = true;
         }
 
-        private void Update()
-        {
-            if (playing && !IsInvoking())
-            {
-                InvokeRepeating("Step", 0.0f, generationSpeed);
-            }
-            else if (!playing)
-            {
-                CancelInvoke();
-            }
-        }
+		public void Pause()
+		{
+            CancelInvoke();
+
+            playing = false;
+		}
 
         private void OnDestroy()
         {

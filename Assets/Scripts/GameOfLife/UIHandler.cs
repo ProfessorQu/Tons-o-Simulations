@@ -7,24 +7,30 @@ namespace Simulations.GameOfLife
 {
 	public class UIHandler : MonoBehaviour
 	{
+		[Header("Game Of Life")]
 		public Master gameOfLife;
 
+		[Header("Grid Size")]
 		public InputField widthInput;
 		public InputField heightInput;
 
+		[Header("Generation Speed")]
 		public Slider genSpeedInput;
 		public Text genSpeedInputText;
 
 		public Text currGenText;
 
-		[Space]
-
+		[Header("Play/Pause Button")]
 		public Image play;
 		public Sprite playSprite;
 		public Sprite pauseSprite;
 
-		[Space]
+		public Image playBackground;
 
+		public Color playColor;
+		public Color pauseColor;
+
+		[Header("Menus")]
 		public GameObject game;
 		public GameObject options;
 
@@ -75,7 +81,17 @@ namespace Simulations.GameOfLife
 
 			currGenText.text = "Generation: " + gameOfLife.generation;
 
-			play.sprite = gameOfLife.playing ? pauseSprite : playSprite;
+
+			if (gameOfLife.playing)
+			{
+				play.sprite = pauseSprite;
+				playBackground.color = pauseColor;
+			}
+			else
+			{
+				play.sprite = playSprite;
+				playBackground.color = playColor;
+			}
 		}
 
 		public void CloseMenu()
@@ -158,6 +174,17 @@ namespace Simulations.GameOfLife
 			if (genSpeedSuccess)
 			{
 				gameOfLife.CancelInvoke();
+			}
+		}
+
+		public void PlayPause()
+		{
+			if (gameOfLife.playing){
+				gameOfLife.Pause();
+			}
+			else
+			{
+				gameOfLife.Play();
 			}
 		}
 	}
