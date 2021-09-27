@@ -10,14 +10,16 @@ namespace Simulations.Raymarching
 	{
 		public Shader shader;
 
-		public Material raymarchMaterial
+		public Material RaymarchMaterial
 		{
 			get
 			{
 				if (!_raymarchMaterial && shader)
 				{
-					_raymarchMaterial = new Material(shader);
-					_raymarchMaterial.hideFlags = HideFlags.HideAndDontSave;
+					_raymarchMaterial = new Material(shader)
+					{
+						hideFlags = HideFlags.HideAndDontSave
+					};
 				}
 
 				return _raymarchMaterial;
@@ -25,7 +27,7 @@ namespace Simulations.Raymarching
 		}
 		private Material _raymarchMaterial;
 
-		public Camera cam
+		public Camera Cam
 		{
 			get
 			{
@@ -76,7 +78,7 @@ namespace Simulations.Raymarching
 
 		private void OnRenderImage(RenderTexture source, RenderTexture destination)
 		{
-			if (!raymarchMaterial)
+			if (!RaymarchMaterial)
 			{
 				Graphics.Blit(source, destination);
 				return;
@@ -84,8 +86,8 @@ namespace Simulations.Raymarching
 
 			CreateScene();
 
-			_raymarchMaterial.SetMatrix("_CamFrustum", CamFrustum(cam));
-			_raymarchMaterial.SetMatrix("_CamToWorld", cam.cameraToWorldMatrix);
+			_raymarchMaterial.SetMatrix("_CamFrustum", CamFrustum(Cam));
+			_raymarchMaterial.SetMatrix("_CamToWorld", Cam.cameraToWorldMatrix);
 
 			_raymarchMaterial.SetFloat("_MaxDistance", maxDistance);
 			_raymarchMaterial.SetInt("_MaxIterations", maxIterations);

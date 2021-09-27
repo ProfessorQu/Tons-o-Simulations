@@ -5,10 +5,10 @@ using UnityEngine;
 using Simulations.Core;
 
 namespace Simulations.GameOfLife{
-    public class Master : Singleton
+    public class Master : MasterBase
     {
         public ComputeShader shader;
-        private int kernel;
+        int kernel;
 
         [Min(1)] public int gridWidth = 1;
         [Min(1)] public int gridHeight = 1;
@@ -20,15 +20,24 @@ namespace Simulations.GameOfLife{
         [HideInInspector] public bool playing = false;
         [HideInInspector] public int generation;
 
-        public float generationSpeed;
+        float simulationSpeed = 1;
 
-        int xGroups;
-        int yGroups;
+		public override float SimulationSpeed
+        {
+            get
+            {
+                return simulationSpeed;
+            }
+            set
+            {
+                simulationSpeed = value;
+            }
+        }
+
+		int xGroups, yGroups;
 
         private bool pingpong = true;
-
-        RenderTexture pingTexture;
-        RenderTexture pongTexture;
+        RenderTexture pingTexture, pongTexture;
 
         private Material mat;
 
@@ -42,22 +51,9 @@ namespace Simulations.GameOfLife{
             xGroups = Mathf.CeilToInt(gridWidth / 8f);
             yGroups = Mathf.CeilToInt(gridHeight / 8f);
 
-            if (pingTexture == null)
+            if (pingTexture == null || pongTexture == null)
             {
-                pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
-                pingTexture.wrapMode = TextureWrapMode.Repeat;
-                pingTexture.enableRandomWrite = true;
-                pingTexture.filterMode = FilterMode.Point;
-                pingTexture.Create();
-            }
-
-            if (pongTexture == null)
-            {
-                pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
-                pongTexture.wrapMode = TextureWrapMode.Repeat;
-                pongTexture.enableRandomWrite = true;
-                pongTexture.filterMode = FilterMode.Point;
-                pongTexture.Create();
+                CreateTextures();
             }
 
             kernel = shader.FindKernel("CSMain");
@@ -70,7 +66,7 @@ namespace Simulations.GameOfLife{
             float aspectRatio = (float)gridWidth / (float)gridHeight;
             transform.localScale = new Vector3(defaultSize * aspectRatio, defaultSize, 1);
 
-            Pause();
+            StopSimulation();
         }
 
         public void Randomize()
@@ -89,7 +85,7 @@ namespace Simulations.GameOfLife{
             shader.Dispatch(initKernel, xGroups, yGroups, 1);
         }
 
-        public void Step()
+        public override void Step()
         {
             if (pingpong)
             {
@@ -111,56 +107,56 @@ namespace Simulations.GameOfLife{
             }
 
             pingpong = !pingpong;
-
             generation++;
         }
 
         public void Clear()
         {
+            CreateTextures();
+
             pingpong = true;
-
-            pingTexture = new RenderTexture(gridWidth, gridHeight, 24);
-            pingTexture.wrapMode = TextureWrapMode.Repeat;
-            pingTexture.enableRandomWrite = true;
-            pingTexture.filterMode = FilterMode.Point;
-            pingTexture.Create();
-
-            pongTexture = new RenderTexture(gridWidth, gridHeight, 24);
-            pongTexture.wrapMode = TextureWrapMode.Repeat;
-            pongTexture.enableRandomWrite = true;
-            pongTexture.filterMode = FilterMode.Point;
-            pongTexture.Create();
-
             mat.mainTexture = pingTexture;
-
             generation = 0;
         }
 
-        public void Play()
+        void CreateTextures()
         {
-            InvokeRepeating("Step", 0.0f, generationSpeed);
+			pingTexture = new RenderTexture(gridWidth, gridHeight, 24)
+			{
+				wrapMode = TextureWrapMode.Repeat,
+				enableRandomWrite = true,
+				filterMode = FilterMode.Point
+			};
+			pingTexture.Create();
 
+			pongTexture = new RenderTexture(gridWidth, gridHeight, 24)
+			{
+				wrapMode = TextureWrapMode.Repeat,
+				enableRandomWrite = true,
+				filterMode = FilterMode.Point
+			};
+			pongTexture.Create();
+        }
+
+        public override void StartSimulation()
+        {
+            InvokeRepeating("Step", 0.0f, 1 / SimulationSpeed);
             playing = true;
         }
 
-		public void Pause()
+		public override void StopSimulation()
 		{
             CancelInvoke();
-
             playing = false;
 		}
 
         private void OnDestroy()
         {
             if (pingTexture)
-            {
                 pingTexture.Release();
-            }
 
             if (pongTexture)
-            {
                 pongTexture.Release();
-            }
         }
     }
 

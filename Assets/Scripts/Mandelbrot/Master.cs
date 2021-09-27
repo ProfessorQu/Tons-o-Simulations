@@ -7,7 +7,7 @@ using Simulations.Core;
 namespace Simulations.Mandelbrot
 {
     [ExecuteInEditMode, RequireComponent(typeof(Camera))]
-    public class Master : Singleton
+    public class Master : MonoBehaviour
     {
         public Camera cam;
         public ComputeShader shader;
@@ -62,9 +62,11 @@ namespace Simulations.Mandelbrot
             {
                 Debug.Log("Creating texture...");
 
-                tex = new RenderTexture(width, height, 24);
-                tex.enableRandomWrite = true;
-                tex.Create();
+				tex = new RenderTexture(width, height, 24)
+				{
+					enableRandomWrite = true
+				};
+				tex.Create();
             }
 
             SetShaderParameters();

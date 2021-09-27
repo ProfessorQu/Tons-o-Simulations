@@ -66,5 +66,11 @@ namespace Simulations.GameOfLife
 				cam.transform.position = defaultPos;
 			}
 		}
+
+		private void OnEnable()
+		{
+			dragPos = new Vector2(0, 0);
+			dragging = false;
+		}
 	}
 }

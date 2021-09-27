@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Simulations.GameOfLife
 {
@@ -9,30 +10,30 @@ namespace Simulations.GameOfLife
 	{
 		[Header("Game Of Life")]
 		public Master gameOfLife;
+		public CameraController camControl;
 
 		[Header("Grid Size")]
-		public InputField widthInput;
-		public InputField heightInput;
+		public TMP_InputField widthInput;
+		public TMP_InputField heightInput;
 
 		[Header("Generation Speed")]
 		public Slider genSpeedInput;
-		public Text genSpeedInputText;
+		public TMP_Text genSpeedValueText;
 
-		public Text currGenText;
+		public TMP_Text currGenText;
 
-		[Header("Play/Pause Button")]
-		public Image play;
+		[Header("Start/Stop Button")]
+		public Image playIcon;
 		public Sprite playSprite;
 		public Sprite pauseSprite;
 
 		public Image playBackground;
-
 		public Color playColor;
 		public Color pauseColor;
 
 		[Header("Menus")]
 		public GameObject game;
-		public GameObject options;
+		public GameObject menu;
 
 		private int prevWidth;
 		private int prevHeight;
@@ -46,11 +47,11 @@ namespace Simulations.GameOfLife
 			widthInput.text = gameOfLife.gridWidth.ToString();
 			heightInput.text = gameOfLife.gridHeight.ToString();
 
-			genSpeedInput.value = gameOfLife.generationSpeed;
-			genSpeedInputText.text = gameOfLife.generationSpeed.ToString();
+			genSpeedInput.value = gameOfLife.SimulationSpeed;
+			genSpeedValueText.text = gameOfLife.SimulationSpeed.ToString();
 
 			game.SetActive(true);
-			options.SetActive(false);
+			menu.SetActive(false);
 		}
 
 		private void Update()
@@ -69,35 +70,40 @@ namespace Simulations.GameOfLife
 
 			if (Input.GetKeyDown(KeyCode.F1))
 			{
-				if (game.activeInHierarchy)
+				if (menuOpen)
 				{
-					game.SetActive(false);
+					if (menu.activeInHierarchy)
+					{
+						menu.SetActive(false);
+					}
+					else
+					{
+						menu.SetActive(true);
+					}
 				}
-				else if (!options.activeInHierarchy)
+				else
 				{
-					game.SetActive(true);
+					if (game.activeInHierarchy)
+					{
+						game.SetActive(false);
+					}
+					else
+					{
+						game.SetActive(true);
+					}
 				}
 			}
 
-			currGenText.text = "Generation: " + gameOfLife.generation;
-
-
-			if (gameOfLife.playing)
-			{
-				play.sprite = pauseSprite;
-				playBackground.color = pauseColor;
-			}
-			else
-			{
-				play.sprite = playSprite;
-				playBackground.color = playColor;
-			}
+			UpdateSpeed();
+			UpdateStartButton();
 		}
 
 		public void CloseMenu()
 		{
 			game.SetActive(true);
-			options.SetActive(false);
+			menu.SetActive(false);
+
+			camControl.enabled = true;
 
 			menuOpen = false;
 		}
@@ -105,86 +111,95 @@ namespace Simulations.GameOfLife
 		public void OpenMenu()
 		{
 			game.SetActive(false);
-			options.SetActive(true);
+			menu.SetActive(true);
+
+			camControl.enabled = false;
 
 			menuOpen = true;
 		}
 
-		public void Submit()
+		void UpdateStartButton()
 		{
-			// Set width, height, generation speed
-			int width;
-			int height;
+			if (gameOfLife.playing)
+			{
+				playIcon.sprite = pauseSprite;
+				playBackground.color = pauseColor;
+			}
+			else
+			{
+				playIcon.sprite = playSprite;
+				playBackground.color = playColor;
+			}
+		}
 
-			// Test for successes for width and height conversion
-			bool widthSuccess = int.TryParse(widthInput.text, out width) && width > 0 && width != prevWidth;
-			bool heightSuccess = int.TryParse(heightInput.text, out height) && height > 0 && height != prevHeight;
+		public void UpdateGrid()
+		{
+			bool widthSuccess = int.TryParse(widthInput.text, out int width) && width > 0 && width != prevWidth;
+			bool heightSuccess = int.TryParse(heightInput.text, out int height) && height > 0 && height != prevHeight;
 
-			float genSpeed = genSpeedInput.value;
 
-			// Test for success for generation speed conversion
-			bool genSpeedSuccess = genSpeed > 1e-05 && genSpeed <= 1 && genSpeed != prevGenSpeed;
-
-			// If width success, set gridwidth
 			if (widthSuccess)
 			{
 				gameOfLife.gridWidth = width;
 				prevWidth = width;
 			}
-			// If no success, reset the text
 			else
 			{
 				widthInput.text = gameOfLife.gridWidth.ToString();
 			}
 
-			// If height success, set height
 			if (heightSuccess)
 			{
 				gameOfLife.gridHeight = height;
 				prevHeight = height;
 			}
-			// If no success, reset the text
 			else
 			{
 				heightInput.text = gameOfLife.gridHeight.ToString();
 			}
 
-			// If generation speed success, set generation speed
-			if (genSpeedSuccess)
-			{
-				gameOfLife.generationSpeed = genSpeed;
-				prevGenSpeed = genSpeed;
-
-				genSpeedInputText.text = ((int)genSpeed).ToString();
-			}
-			// If no success, reset the text
-			else
-			{
-				genSpeedInput.value = gameOfLife.generationSpeed;
-			}
-
-			// If width or height is a success reset entire board
 			if (widthSuccess || heightSuccess)
 			{
 				gameOfLife.Clear();
 				gameOfLife.Setup();
 			}
-
-			// If gen speed is a success, just cancel invoke
-			if (genSpeedSuccess)
-			{
-				gameOfLife.CancelInvoke();
-			}
 		}
 
-		public void PlayPause()
+		void UpdateSpeed()
 		{
-			if (gameOfLife.playing){
-				gameOfLife.Pause();
+			float genSpeed = genSpeedInput.value;
+
+			bool genSpeedSuccess = genSpeed != prevGenSpeed;
+
+			if (genSpeedSuccess)
+			{
+				gameOfLife.SimulationSpeed = genSpeed;
+				prevGenSpeed = genSpeed;
+
+				genSpeedValueText.text = (Mathf.Round(genSpeed * 100) / 100).ToString();
+
+				if (gameOfLife.playing)
+				{
+					gameOfLife.StopSimulation();
+					gameOfLife.StartSimulation();
+				}
 			}
 			else
 			{
-				gameOfLife.Play();
+				genSpeedInput.value = gameOfLife.SimulationSpeed;
+			}
+
+			currGenText.text = "Generation: " + gameOfLife.generation;
+		}
+
+		public void StartStop()
+		{
+			if (gameOfLife.playing){
+				gameOfLife.StopSimulation();
+			}
+			else
+			{
+				gameOfLife.StartSimulation();
 			}
 		}
 	}

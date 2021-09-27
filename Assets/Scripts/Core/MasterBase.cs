@@ -4,9 +4,11 @@ using UnityEngine;
 
 namespace Simulations.Core
 {
-    public class Singleton : MonoBehaviour
+    public abstract class MasterBase : MonoBehaviour
     {
-        public static Singleton instance = null;
+        public static MasterBase instance = null;
+
+        public abstract float SimulationSpeed { get; set; }
 
         protected void Awake()
         {
@@ -19,5 +21,10 @@ namespace Simulations.Core
                 instance = this;
 			}
 		}
+
+        public abstract void Step();
+
+        public abstract void StartSimulation();
+        public abstract void StopSimulation();
     }
 }
