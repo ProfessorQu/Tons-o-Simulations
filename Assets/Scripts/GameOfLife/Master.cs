@@ -15,6 +15,8 @@ namespace Simulations.GameOfLife{
 
         public float defaultSize = 20;
 
+        public Vector4 [] neigbors = new Vector4[8];
+
         [Range(0, 1)] public float valueToBeAlive = 0.75f;
 
         [HideInInspector] public bool playing = false;
@@ -87,6 +89,9 @@ namespace Simulations.GameOfLife{
 
         public override void Step()
         {
+            shader.SetVectorArray("neigbors", neigbors);
+            shader.SetInt("numNeigbors", neigbors.Length);
+
             if (pingpong)
             {
                 shader.SetTexture(kernel, "Input", pingTexture);

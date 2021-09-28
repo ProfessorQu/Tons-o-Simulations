@@ -17,7 +17,6 @@ namespace Simulations.GameOfLife
 		public TMP_InputField heightInput;
 
 		[Header("Generation Speed")]
-		public Slider genSpeedInput;
 		public TMP_Text genSpeedValueText;
 
 		public TMP_Text currGenText;
@@ -47,8 +46,7 @@ namespace Simulations.GameOfLife
 			widthInput.text = gameOfLife.gridWidth.ToString();
 			heightInput.text = gameOfLife.gridHeight.ToString();
 
-			genSpeedInput.value = gameOfLife.SimulationSpeed;
-			genSpeedValueText.text = gameOfLife.SimulationSpeed.ToString();
+			genSpeedValueText.text = $"{gameOfLife.SimulationSpeed}%";
 
 			game.SetActive(true);
 			menu.SetActive(false);
@@ -94,8 +92,9 @@ namespace Simulations.GameOfLife
 				}
 			}
 
-			UpdateSpeed();
 			UpdateStartButton();
+
+			currGenText.text = $"Generation: {gameOfLife.generation}";
 		}
 
 		public void CloseMenu()
@@ -165,18 +164,14 @@ namespace Simulations.GameOfLife
 			}
 		}
 
-		void UpdateSpeed()
+		public void SetGenSpeed(float genSpeed)
 		{
-			float genSpeed = genSpeedInput.value;
-
-			bool genSpeedSuccess = genSpeed != prevGenSpeed;
-
-			if (genSpeedSuccess)
+			if (genSpeed != prevGenSpeed)
 			{
 				gameOfLife.SimulationSpeed = genSpeed;
 				prevGenSpeed = genSpeed;
 
-				genSpeedValueText.text = (Mathf.Round(genSpeed * 100) / 100).ToString();
+				genSpeedValueText.text = $"{Mathf.Round(genSpeed * 100) / 100}%";
 
 				if (gameOfLife.playing)
 				{
@@ -184,12 +179,6 @@ namespace Simulations.GameOfLife
 					gameOfLife.StartSimulation();
 				}
 			}
-			else
-			{
-				genSpeedInput.value = gameOfLife.SimulationSpeed;
-			}
-
-			currGenText.text = "Generation: " + gameOfLife.generation;
 		}
 
 		public void StartStop()

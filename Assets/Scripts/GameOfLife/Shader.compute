@@ -18,6 +18,10 @@ unsigned int _Width, _Height;
 float _Random;
 float _ValueToBeAlive;
 
+float2 neigbors[8];
+int numNeigbors;
+
+
 float rand(float2 co)
 {
     return 0.5 + (frac(sin(dot(co.xy, float2(12.9898, _Random))) * 43758.5453)) * 0.5;
@@ -42,6 +46,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     bool negX = id.x != 0;
     bool posX = id.x != _Width;
     
+    /*
     if (negY)
     {
         if (negX)
@@ -68,6 +73,27 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         
         if (posX)
             neigborCells += Input[id.xy + float2(1, 1)];    // Top Right
+    }*/
+    
+    for (int i = 0; i < numNeigbors; i++)
+    {
+        float2 neigbor = neigbors[i];
+        
+        if (neigbor.x > 0 && posX)
+        {
+            if ((neigbor.y < 0 && negY) || (neigbor.y > 0 && posY))
+            {
+                neigborCells += Input[id.xy + neigbor];
+            }
+
+        }
+        else if (neigbor.x < 0 && negX)
+        {
+            if ((neigbor.y < 0 && negY) || (neigbor.y > 0 && posY))
+            {
+                neigborCells += Input[id.xy + neigbor];
+            }
+        }
     }
     
     // Get the alive neigbor cells
