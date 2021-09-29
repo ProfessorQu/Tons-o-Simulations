@@ -15,7 +15,16 @@ namespace Simulations.GameOfLife{
 
         public float defaultSize = 20;
 
-        public Vector4 [] neigbors = new Vector4[8];
+        public Vector2[] neighborOffsets = new Vector2[8] {
+            new Vector2(1,   1),
+            new Vector2(1,   0),
+            new Vector2(1,  -1),
+            new Vector2(0,   1),
+            new Vector2(0,  -1),
+            new Vector2(-1,  1),
+            new Vector2(-1,  0),
+            new Vector2(-1, -1),
+        };
 
         [Range(0, 1)] public float valueToBeAlive = 0.75f;
 
@@ -89,8 +98,15 @@ namespace Simulations.GameOfLife{
 
         public override void Step()
         {
-            shader.SetVectorArray("neigbors", neigbors);
-            shader.SetInt("numNeigbors", neigbors.Length);
+            Vector4[] offsets = new Vector4[neighborOffsets.Length];
+
+            for (int i = 0; i < neighborOffsets.Length; i ++)
+            {
+                offsets[i] = new Vector4(neighborOffsets[i].x, neighborOffsets[i].y);
+            }
+
+            shader.SetVectorArray("neighborOffsets", offsets);
+            shader.SetInt("numNeigbors", neighborOffsets.Length);
 
             if (pingpong)
             {

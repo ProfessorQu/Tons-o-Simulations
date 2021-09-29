@@ -4,21 +4,21 @@
 /*
 Rules of the Game Of Life
 
-1. Live cells with < 2 live neigbors dies.
+1. Live cells with < 2 live neighbors dies.
 2. Live cells with 2 or 3 live neighbors live.
 3. Live cells with > 3 live neighbors dies.
-4. Dead cells with 3 live neigbors becomes alive.
+4. Dead cells with 3 live neighbors becomes alive.
 */
 
 RWTexture2D<float4> Input;
 RWTexture2D<float4> Result;
 
-unsigned int _Width, _Height;
+int _Width, _Height;
 
 float _Random;
 float _ValueToBeAlive;
 
-float2 neigbors[8];
+float2 neighborOffsets[8];
 int numNeigbors;
 
 
@@ -36,78 +36,82 @@ void CSInit(uint3 id : SV_DispatchThreadID)
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
-    float4 neigborCells = float4(0, 0, 0, 1);
+    float4 neighborCells = float4(0, 0, 0, 1);
     
     // Test if negetive X or positive X is allowed
-    bool negY = id.y != 0;
-    bool posY = id.y != _Height;
+    //bool negY = id.y != 0;
+    //bool posY = id.y != _Height;
     
     // Test if negetive Y or positive Y is allowed
-    bool negX = id.x != 0;
-    bool posX = id.x != _Width;
-    
-    /*
-    if (negY)
-    {
-        if (negX)
-            neigborCells += Input[id.xy + float2(-1, -1)];  // Bottom Left
-        
-        neigborCells += Input[id.xy + float2(0, -1)];       // Bottom Middle
-        
-        if (posX)
-            neigborCells += Input[id.xy + float2(1, -1)];   // Bottom Right
-    }
-    
-    if (negX)
-        neigborCells += Input[id.xy + float2(-1,  0)];      // Left
-    
-    if (posX)
-        neigborCells += Input[id.xy + float2( 1,  0)];      // Right
-    
-    if (posY)
-    {
-        if (negX)
-            neigborCells += Input[id.xy + float2(-1, 1)];   // Top Left
-        
-        neigborCells += Input[id.xy + float2(0, 1)];        // Top Middle
-        
-        if (posX)
-            neigborCells += Input[id.xy + float2(1, 1)];    // Top Right
-    }*/
+    //bool negX = id.x - 1 >= 0;
+    //bool posX = id.x + 1 <= _Width;
     
     for (int i = 0; i < numNeigbors; i++)
     {
-        float2 neigbor = neigbors[i];
+        float2 neighbor = neighborOffsets[i];
         
-        if (neigbor.x > 0 && posX)
+        bool negX = id.x - neighbor.x >= 0;
+        bool posX = id.x + neighbor.x <= _Width;
+        
+        bool negY = id.x - neighbor.y >= 0;
+        bool posY = id.x + neighbor.y <= _Height;
+        
+        if (neighbor.x > 0 && posX)
         {
-            if ((neigbor.y < 0 && negY) || (neigbor.y > 0 && posY))
+            if (neighbor.y < 0 && negY)
             {
-                neigborCells += Input[id.xy + neigbor];
+                neighborCells += Input[id.xy + neighbor];
+            }
+            else if (neighbor.y > 0 && posY)
+            {
+                neighborCells += Input[id.xy + neighbor];
+            }
+            else if (neighbor.y == 0)
+            {
+                neighborCells += Input[id.xy + neighbor];
             }
 
         }
-        else if (neigbor.x < 0 && negX)
+        else if (neighbor.x < 0 && negX)
         {
-            if ((neigbor.y < 0 && negY) || (neigbor.y > 0 && posY))
+            if (neighbor.y < 0 && negY)
             {
-                neigborCells += Input[id.xy + neigbor];
+                neighborCells += Input[id.xy + neighbor];
+            }
+            else if (neighbor.y > 0 && posY)
+            {
+                neighborCells += Input[id.xy + neighbor];
+            }
+            else if (neighbor.y == 0)
+            {
+                neighborCells += Input[id.xy + neighbor];
+            }
+        }
+        else if (neighbor.x == 0)
+        {
+            if (neighbor.y < 0 && negY)
+            {
+                neighborCells += Input[id.xy + neighbor];
+            }
+            else if (neighbor.y > 0 && posY)
+            {
+                neighborCells += Input[id.xy + neighbor];
             }
         }
     }
     
-    // Get the alive neigbor cells
-    int aliveCells = (int) neigborCells.r;
+    // Get the alive neighbor cells
+    int aliveCells = (int) neighborCells.r;
     
     // Check if current cell is alive
     if (Input[id.xy].r > 0.5)
     {
-        // neigbor cells = 2 or = 3
+        // neighbor cells = 2 or = 3
         Result[id.xy] = (aliveCells == 2 || aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
     }
     else
     {
-        // neigbor cells = 3
+        // neighbor cells = 3
         Result[id.xy] = (aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
     }
 }
