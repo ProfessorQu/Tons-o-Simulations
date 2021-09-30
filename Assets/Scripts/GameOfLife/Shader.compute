@@ -18,8 +18,14 @@ int _Width, _Height;
 float _Random;
 float _ValueToBeAlive;
 
-float2 neighborOffsets[8];
+float2 neighborOffsets[24];
 int numNeigbors;
+
+int becomeAlive[10];
+int numBecomeAlive;
+
+int stayAlive[10];
+int numStayAlive;
 
 
 float rand(float2 co)
@@ -37,14 +43,6 @@ void CSInit(uint3 id : SV_DispatchThreadID)
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
     float4 neighborCells = float4(0, 0, 0, 1);
-    
-    // Test if negetive X or positive X is allowed
-    //bool negY = id.y != 0;
-    //bool posY = id.y != _Height;
-    
-    // Test if negetive Y or positive Y is allowed
-    //bool negX = id.x - 1 >= 0;
-    //bool posX = id.x + 1 <= _Width;
     
     for (int i = 0; i < numNeigbors; i++)
     {
@@ -100,18 +98,38 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         }
     }
     
-    // Get the alive neighbor cells
     int aliveCells = (int) neighborCells.r;
     
-    // Check if current cell is alive
+    //Result[id.xy] = float4(0, 0, 0, 1);
+    
+    // Alive
     if (Input[id.xy].r > 0.5)
     {
-        // neighbor cells = 2 or = 3
-        Result[id.xy] = (aliveCells == 2 || aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
+        //Result[id.xy] = (aliveCells == 2 || aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
+        
+        for (int i = 0; i < numStayAlive; i++)
+        {
+            if (aliveCells == stayAlive[i])
+            {
+                Result[id.xy] = float4(1, 1, 1, 1);
+            }
+        }
+        
+        //Result[id.xy] = float4(0, 0, 0, 1);
     }
+    // Dead
     else
     {
-        // neighbor cells = 3
-        Result[id.xy] = (aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
+        //Result[id.xy] = (aliveCells == 3) ? float4(1, 1, 1, 1) : float4(0, 0, 0, 1);
+        
+        for (int i = 0; i < numBecomeAlive; i++)
+        {
+            if (aliveCells == becomeAlive[i])
+            {
+                Result[id.xy] = float4(1, 1, 1, 1);
+            }
+        }
+        
+        //Result[id.xy] = float4(0, 0, 0, 1);
     }
 }

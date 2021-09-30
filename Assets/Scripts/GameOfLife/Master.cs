@@ -4,7 +4,8 @@ using UnityEngine;
 
 using Simulations.Core;
 
-namespace Simulations.GameOfLife{
+namespace Simulations.GameOfLife
+{
     public class Master : MasterBase
     {
         public ComputeShader shader;
@@ -15,21 +16,16 @@ namespace Simulations.GameOfLife{
 
         public float defaultSize = 20;
 
-        public Vector2[] neighborOffsets = new Vector2[8] {
-            new Vector2(1,   1),
-            new Vector2(1,   0),
-            new Vector2(1,  -1),
-            new Vector2(0,   1),
-            new Vector2(0,  -1),
-            new Vector2(-1,  1),
-            new Vector2(-1,  0),
-            new Vector2(-1, -1),
-        };
+        [HideInInspector]
+        public Vector2[] neighborOffsets = new Vector2[24];
 
         [Range(0, 1)] public float valueToBeAlive = 0.75f;
 
         [HideInInspector] public bool playing = false;
-        [HideInInspector] public int generation;
+        [HideInInspector] public int generation = 0;
+
+        public int[] becomeAlive = new int[1];
+        public int[] stayAlive = new int[2];
 
         float simulationSpeed = 1;
 
@@ -107,6 +103,12 @@ namespace Simulations.GameOfLife{
 
             shader.SetVectorArray("neighborOffsets", offsets);
             shader.SetInt("numNeigbors", neighborOffsets.Length);
+
+            shader.SetInts("becomeAlive", becomeAlive);
+            shader.SetInt("numBecomeAlive", becomeAlive.Length);
+
+            shader.SetInts("stayAlive", stayAlive);
+            shader.SetInt("numStayAlive", stayAlive.Length);
 
             if (pingpong)
             {
