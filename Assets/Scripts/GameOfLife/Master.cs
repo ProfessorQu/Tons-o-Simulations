@@ -27,6 +27,9 @@ namespace Simulations.GameOfLife
         public int[] becomeAlive = new int[1];
         public int[] stayAlive = new int[2];
 
+        ComputeBuffer becomeAliveBuffer;
+        ComputeBuffer stayAliveBuffer;
+
         float simulationSpeed = 1;
 
 		public override float SimulationSpeed
@@ -104,10 +107,16 @@ namespace Simulations.GameOfLife
             shader.SetVectorArray("neighborOffsets", offsets);
             shader.SetInt("numNeigbors", neighborOffsets.Length);
 
-            shader.SetInts("becomeAlive", becomeAlive);
+            becomeAliveBuffer = new ComputeBuffer(becomeAlive.Length, sizeof(int));
+            stayAliveBuffer = new ComputeBuffer(stayAlive.Length, sizeof(int));
+
+            becomeAliveBuffer.SetData(becomeAlive);
+            stayAliveBuffer.SetData(stayAlive);
+
+            shader.SetBuffer(kernel, "becomeAlive", becomeAliveBuffer);
             shader.SetInt("numBecomeAlive", becomeAlive.Length);
 
-            shader.SetInts("stayAlive", stayAlive);
+            shader.SetBuffer(kernel, "stayAlive", stayAliveBuffer);
             shader.SetInt("numStayAlive", stayAlive.Length);
 
             if (pingpong)
@@ -131,6 +140,9 @@ namespace Simulations.GameOfLife
 
             pingpong = !pingpong;
             generation++;
+
+            becomeAliveBuffer.Dispose();
+            stayAliveBuffer.Dispose();
         }
 
         public void Clear()
